@@ -24,9 +24,9 @@
         h1, h2 {
             text-align: center;
             color: #2c3e50;
+            margin-bottom: 5px;
         }
 
-        /* স্ক্রিনশটের মতো ডানে ভাসমান স্কোর বাটন */
         .floating-score {
             position: fixed;
             top: 20px;
@@ -61,7 +61,6 @@
             gap: 12px 20px;
         }
 
-        /* অপশন বাটন স্টাইল */
         .option-btn {
             background-color: #ffffff;
             border: 1px solid #ced4da;
@@ -75,7 +74,6 @@
             transition: all 0.2s ease;
         }
 
-        /* মাউস নিলে হালকা ছাই/হভার কালার */
         .option-btn:hover:not(.disabled) {
             background-color: #e2e6ea;
             border-color: #dae0e5;
@@ -86,7 +84,6 @@
             opacity: 0.85;
         }
 
-        /* সঠিক ও ভুল উত্তরের কালার */
         .correct {
             background-color: #2ecc71 !important;
             color: white !important;
@@ -106,7 +103,6 @@
             text-align: left;
         }
 
-        /* ফলাফলের বক্স - সবার নিচে */
         .result-section {
             text-align: center;
             margin-top: 40px;
@@ -165,7 +161,6 @@
 </head>
 <body>
 
-<!-- ডানে ভাসমান লাইভ স্কোর বাটন -->
 <div class="floating-score">স্কোর: <span id="live-score">0</span></div>
 
 <div class="container">
@@ -174,10 +169,8 @@
     <h3 style="text-align:center; color:#7f8c8d; font-size: 14px; margin-top: 5px;">[বিসিএস, এনটিআরসিএ, পিএসসি নন-ক্যাডার ও বিশ্ববিদ্যালয় ভর্তি পরীক্ষার প্রশ্ন]</h3>
     <hr><br>
 
-    <!-- প্রশ্ন লোড হওয়ার জায়গা -->
-    <div id="quiz-wrapper"></div>
+    <div id="quiz-wrapper">প্রশ্ন লোড হচ্ছে...</div>
 
-    <!-- ১০০টি প্রশ্নের পর সবার নিচে ফলাফলের সামারি -->
     <div class="result-section">
         <h2>পরীক্ষার ফলাফল</h2>
         <div class="detailed-stats">
@@ -201,7 +194,8 @@ const finalScoreDisplay = document.getElementById('final-score');
 
 async function loadQuiz() {
     try {
-        const res = await fetch('http://localhost:5000/api/questions');
+        // Render এর লাইভ ব্যাকএন্ড লিঙ্ক যুক্ত করা হয়েছে
+        const res = await fetch('https://mosabber-quiz-app.onrender.com/api/questions');
         quizData = await res.json();
 
         quizWrapper.innerHTML = '';
@@ -237,7 +231,7 @@ async function loadQuiz() {
             quizWrapper.appendChild(qBlock);
         });
     } catch (err) {
-        quizWrapper.innerHTML = '<h3 style="color:red; text-align:center;">সার্ভার থেকে প্রশ্ন লোড করা যায়নি! ব্যাকএন্ড (node server.js) রান আছে তো?</h3>';
+        quizWrapper.innerHTML = '<h3 style="color:red; text-align:center;">সার্ভার থেকে প্রশ্ন লোড করা যায়নি!</h3>';
         console.error("Failed to load questions:", err);
     }
 }
@@ -264,7 +258,6 @@ function handleAnswer(selectedBtn, qIndex, selectedIndex, optContainer) {
         incorrectCount += 1;
     }
 
-    // লাইভ এবং নিচের স্কোরের হিসাব আপডেট
     liveScoreDisplay.innerText = score;
     correctCountDisplay.innerText = correctCount;
     incorrectCountDisplay.innerText = incorrectCount;
