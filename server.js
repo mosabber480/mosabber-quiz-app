@@ -4,22 +4,23 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 
 // MongoDB ডাটাবেসে কানেক্ট করা
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Database Connected Successfully!'))
-    .catch((err) => console.log('Database Error:', err));
+  .then(() => console.log('MongoDB Database Connected Successfully!'))
+  .catch((err) => console.log('Database Error:', err));
 
-// প্রশ্নের Schema তৈরি
+// প্রশ্নের Schema তৈরি (তৃতীয় প্যারামিটারে 'questions' দিয়ে কালেকশন নির্দিষ্ট করা হয়েছে)
 const QuestionSchema = new mongoose.Schema({
     q: String,
     options: [String],
     ans: Number
 });
 
-const Question = mongoose.model('Question', QuestionSchema);
+const Question = mongoose.model('Question', QuestionSchema, 'questions');
 
 // ১. ডাটাবেস থেকে সব প্রশ্ন পাওয়ার API
 app.get('/api/questions', async (req, res) => {
@@ -45,5 +46,5 @@ app.post('/api/questions', async (req, res) => {
 // সার্ভার চালু করা
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
