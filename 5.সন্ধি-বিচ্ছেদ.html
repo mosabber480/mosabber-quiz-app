@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বাংলা ব্যাকরণ মাস্টার কুইজ - সন্ধি ও সন্ধি-বিচ্ছেদ ১০০ প্রশ্ন</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        /* স্ক্রিনশটের মতো ডানে ভাসমান স্কোর বাটন */
+        .floating-score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .question-block {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .question-text {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: left;
+        }
+        
+        .options-container {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+        }
+
+        /* অপশন বাটন স্টাইল */
+        .option-btn {
+            background-color: #ffffff;
+            border: 1px solid #ced4da;
+            color: #333333;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        /* মাউস নিলে হালকা ছাই/হভার কালার */
+        .option-btn:hover:not(.disabled) {
+            background-color: #e2e6ea;
+            border-color: #dae0e5;
+        }
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.85;
+        }
+
+        /* সঠিক ও ভুল উত্তরের কালার */
+        .correct {
+            background-color: #2ecc71 !important;
+            color: white !important;
+            border-color: #27ae60 !important;
+        }
+        .incorrect {
+            background-color: #e74c3c !important;
+            color: white !important;
+            border-color: #c0392b !important;
+        }
+
+        .answer-text {
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 10px;
+            display: none;
+            text-align: left;
+        }
+
+        /* ফলাফলের বক্স - সবার নিচে */
+        .result-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 8px;
+        }
+        .result-section h2 {
+            margin-top: 0;
+            font-size: 22px;
+            color: #2c3e50;
+        }
+        .detailed-stats {
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .correct-count {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        .incorrect-count {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        #final-score {
+            font-size: 22px;
+            color: #2c3e50;
+            font-weight: bold;
+            border-top: 2px solid #bdc3c7;
+            padding-top: 10px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 20px; }
+            h1, h2 { font-size: 18px; }
+            .floating-score {
+                top: 10px;
+                right: 10px;
+                padding: 8px 14px;
+                font-size: 15px;
+            }
+            .options-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .option-btn {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ডানে ভাসমান লাইভ স্কোর বাটন -->
+<div class="floating-score">স্কোর: <span id="live-score">0</span></div>
+
+<div class="container">
+    <h1>বাংলা ব্যাকরণ মাস্টার কুইজ</h1>
+    <h2>টপিক: সন্ধি ও সন্ধি-বিচ্ছেদ (১০০টি মেগা প্রশ্ন ব্যাংক)</h2>
+    <h3 style="text-align:center; color:#7f8c8d; font-size: 14px; margin-top: 5px;">[বিসিএস, এনটিআরসিএ, পিএসসি নন-ক্যাডার ও বিশ্ববিদ্যালয় ভর্তি পরীক্ষার প্রশ্ন]</h3>
+    <hr><br>
+
+    <!-- প্রশ্ন লোড হওয়ার জায়গা -->
+    <div id="quiz-wrapper"></div>
+
+    <!-- ১০০টি প্রশ্নের পর সবার নিচে ফলাফলের সামারি -->
+    <div class="result-section">
+        <h2>পরীক্ষার ফলাফল</h2>
+        <div class="detailed-stats">
+            সঠিক উত্তর: <span id="correct-count-display" class="correct-count">০</span> টি &nbsp;&nbsp;|&nbsp;&nbsp; ভুল উত্তর: <span id="incorrect-count-display" class="incorrect-count">০</span> টি
+        </div>
+        <div id="final-score">আপনার মোট প্রাপ্ত স্কোর: 0</div>
+    </div>
+</div>
+
+<script>
+let quizData = [];
+let score = 0;
+let correctCount = 0;
+let incorrectCount = 0;
+
+const quizWrapper = document.getElementById('quiz-wrapper');
+const liveScoreDisplay = document.getElementById('live-score');
+const correctCountDisplay = document.getElementById('correct-count-display');
+const incorrectCountDisplay = document.getElementById('incorrect-count-display');
+const finalScoreDisplay = document.getElementById('final-score');
+
+async function loadQuiz() {
+    try {
+        const res = await fetch('http://localhost:5000/api/questions');
+        quizData = await res.json();
+
+        quizWrapper.innerHTML = '';
+        quizData.forEach((item, qIndex) => {
+            const qBlock = document.createElement('div');
+            qBlock.className = 'question-block';
+
+            const qText = document.createElement('div');
+            qText.className = 'question-text';
+            qText.innerText = item.q;
+            qBlock.appendChild(qText);
+
+            const optContainer = document.createElement('div');
+            optContainer.className = 'options-container';
+
+            item.options.forEach((opt, oIndex) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                
+                btn.onclick = () => handleAnswer(btn, qIndex, oIndex, optContainer);
+                optContainer.appendChild(btn);
+            });
+
+            qBlock.appendChild(optContainer);
+
+            const ansText = document.createElement('div');
+            ansText.className = 'answer-text';
+            ansText.id = `ans-text-${qIndex}`;
+            ansText.innerText = `উত্তর: ${item.options[item.ans]}`;
+            qBlock.appendChild(ansText);
+
+            quizWrapper.appendChild(qBlock);
+        });
+    } catch (err) {
+        quizWrapper.innerHTML = '<h3 style="color:red; text-align:center;">সার্ভার থেকে প্রশ্ন লোড করা যায়নি! ব্যাকএন্ড (node server.js) রান আছে তো?</h3>';
+        console.error("Failed to load questions:", err);
+    }
+}
+
+function handleAnswer(selectedBtn, qIndex, selectedIndex, optContainer) {
+    const currentQuestion = quizData[qIndex];
+    const allButtons = optContainer.querySelectorAll('.option-btn');
+    
+    allButtons.forEach(btn => {
+        btn.classList.add('disabled');
+        btn.onclick = null;
+    });
+
+    const correctBtn = allButtons[currentQuestion.ans];
+
+    if (selectedIndex === currentQuestion.ans) {
+        selectedBtn.classList.add('correct');
+        score += 1;
+        correctCount += 1;
+    } else {
+        selectedBtn.classList.add('incorrect');
+        correctBtn.classList.add('correct');
+        score -= 0.5;
+        incorrectCount += 1;
+    }
+
+    // লাইভ এবং নিচের স্কোরের হিসাব আপডেট
+    liveScoreDisplay.innerText = score;
+    correctCountDisplay.innerText = correctCount;
+    incorrectCountDisplay.innerText = incorrectCount;
+    finalScoreDisplay.innerText = `আপনার মোট প্রাপ্ত স্কোর: ${score}`;
+
+    document.getElementById(`ans-text-${qIndex}`).style.display = 'block';
+}
+
+window.onload = loadQuiz;
+</script>
+
+</body>
+</html>
