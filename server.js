@@ -8,42 +8,36 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB ডাটাবেসে কানেক্ট করা
+// MongoDB কানেকশন
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Database Connected Successfully!'))
+  .then(() => console.log('MongoDB Connected Successfully!'))
   .catch((err) => console.log('Database Error:', err));
 
-// প্রশ্নের Schema তৈরি (তৃতীয় প্যারামিটারে 'questions' দিয়ে কালেকশন নির্দিষ্ট করা হয়েছে)
-const QuestionSchema = new mongoose.Schema({
-    q: String,
-    options: [String],
-    ans: Number
-});
+// Schema (কোনো নির্দিষ্ট কালেকশন নাম না বেঁধে Flexibly রাখা হয়েছে)
+const QuestionSchema = new mongoose.Schema({}, { strict: false });
 
-const Question = mongoose.model('Question', QuestionSchema, 'questions');
-
-// ১. ডাটাবেস থেকে সব প্রশ্ন পাওয়ার API
+// Flexible Query Route
 app.get('/api/questions', async (req, res) => {
     try {
-        const questions = await Question.find();
+        // ১. ডাটাবেসের সব কালেকশনের নাম চেক করা
+        const collections = await mongoose.connection.db.listCollections().toArray();
+        const collectionNames = collections.map(c => c.name);
+        
+        // ২. কালেকশন 'questions' বা প্রথম পাওয়া কালেকশন থেকে ডাটা নেওয়া
+        let targetCollection = collectionNames.find(name => name.includes('question')) || collectionNames[0];
+
+        if (!targetCollection) {
+            return res.json([]);
+        }
+
+        const questions = await mongoose.connection.db.collection(targetCollection).find({}).toArray();
         res.json(questions);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Failed to fetch questions' });
     }
 });
 
-// ২. ডাটাবেসে নতুন প্রশ্ন যোগ করার API
-app.post('/api/questions', async (req, res) => {
-    try {
-        const newQuestions = req.body;
-        await Question.insertMany(newQuestions);
-        res.json({ message: 'Questions added successfully!' });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to save questions' });
-    }
-});
-
-// সার্ভার চালু করা
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
