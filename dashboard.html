@@ -3,74 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>কুইজ অ্যাডমিন ড্যাশবোর্ড</title>
+    <title>মাস্টার কুইজ ড্যাশবোর্ড</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #f4f7f6; max-width: 600px; margin: 0 auto; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; background-color: #f4f7f6; max-width: 900px; margin: 0 auto; }
+        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2, h3 { color: #333; }
+        .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        input:focus, select:focus { border-color: #007bff; outline: none; }
-        .options-container { background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px dashed #ccc; margin-bottom: 15px; }
-        button { background-color: #28a745; color: white; padding: 12px 15px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
-        button:hover { background-color: #218838; }
-        .nav-link { display: block; text-align: center; margin-top: 15px; color: #007bff; text-decoration: none; }
-        .nav-link:hover { text-decoration: underline; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-success { background: #28a745; color: white; width: 100%; font-size: 16px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-cancel { background: #6c757d; color: white; margin-left: 10px; }
+        .q-item { background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 5px solid #007bff; }
+        .action-btns { margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>নতুন কুইজ প্রশ্ন যোগ করুন</h2>
-        
+    <div class="box">
+        <h2 id="formTitle">নতুন কুইজ প্রশ্ন যোগ করুন</h2>
         <form id="quizForm">
-            <!-- প্রশ্ন ইনপুট -->
+            <input type="hidden" id="questionId"> <!-- এডিটের সময় আইডি রাখার জন্য -->
+            
             <div class="form-group">
-                <label for="question">প্রশ্ন (Question):</label>
-                <input type="text" id="question" placeholder="যেমন: 'সন্ধি' শব্দের অর্থ কী?" required>
-            </div>
-
-            <!-- অপশনসমূহ -->
-            <div class="options-container">
-                <label>অপশনসমূহ (Options):</label>
-                <div class="form-group">
-                    <input type="text" id="option0" placeholder="অপশন ১ (ইন্ডেক্স 0)" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="option1" placeholder="অপশন ২ (ইন্ডেক্স 1)" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="option2" placeholder="অপশন ৩ (ইন্ডেক্স 2)" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="option3" placeholder="অপশন ৪ (ইন্ডেক্স 3)" required>
-                </div>
-            </div>
-
-            <!-- সঠিক উত্তরের ইনডেক্স সিলেক্ট করার ড্রপডাউন -->
-            <div class="form-group">
-                <label for="answer">সঠি উত্তরের ইনডেক্স (Correct Answer Index):</label>
-                <select id="answer" required>
-                    <option value="" disabled selected>সঠিক অপশনটি সিলেক্ট করুন</option>
-                    <option value="0">অপশন ১ (ইন্ডেক্স 0)</option>
-                    <option value="1">অপশন ২ (ইন্ডেক্স 1)</option>
-                    <option value="2">অপশন ৩ (ইন্ডেক্স 2)</option>
-                    <option value="3">অপশন ৪ (ইন্ডেক্স 3)</option>
+                <label>টপিক / মডিউল সিলেক্ট করুন:</label>
+                <!-- আপনি এখানে আপনার ১০০টি টপিক ড্রপডাউনে যোগ করতে পারেন -->
+                <select id="category" required onchange="loadQuestions()">
+                    <option value="5.সন্ধি-বিচ্ছেদ">৫. সন্ধি-বিচ্ছেদ</option>
+                    <option value="2.ধ্বনি-ও-বর্ণ">২. ধ্বনি ও বর্ণ</option>
+                    <option value="1.ভাষা">১. ভাষা</option>
                 </select>
             </div>
 
-            <button type="submit">ডাটাবেসে সাবমিট করুন</button>
-        </form>
+            <div class="form-group">
+                <label>প্রশ্ন:</label>
+                <input type="text" id="question" required>
+            </div>
 
-        <a class="nav-link" href="index.html">← হোমপেজে ফিরে যান</a>
+            <div class="form-group"><input type="text" id="option0" placeholder="অপশন ১ (ইনডেক্স 0)" required></div>
+            <div class="form-group"><input type="text" id="option1" placeholder="অপশন ২ (ইনডেক্স 1)" required></div>
+            <div class="form-group"><input type="text" id="option2" placeholder="অপশন ৩ (ইনডেক্স 2)" required></div>
+            <div class="form-group"><input type="text" id="option3" placeholder="অপশন ৪ (ইনডেক্স 3)" required></div>
+
+            <div class="form-group">
+                <label>সঠিক উত্তরের ইনডেক্স:</label>
+                <select id="answer" required>
+                    <option value="0">অপশন ১ (ইনডেক্স 0)</option>
+                    <option value="1">অপশন ২ (ইনডেক্স 1)</option>
+                    <option value="2">অপশন ৩ (ইনডেক্স 2)</option>
+                    <option value="3">অপশন ৪ (ইনডেক্স 3)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-success" id="submitBtn">ডাটাবেসে সাবমিট করুন</button>
+            <button type="button" class="btn-cancel" id="cancelBtn" style="display:none;" onclick="resetForm()">বাতিল করুন</button>
+        </form>
+    </div>
+
+    <div class="box">
+        <h3>এই টপিকের বর্তমান প্রশ্নসমূহ (<span id="qCount">0</span>)</h3>
+        <div id="questionsList">টপিক সিলেক্ট করলে প্রশ্নগুলো এখানে দেখাবে...</div>
     </div>
 
     <script>
+        const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
+        let isEditing = false;
+
+        // ১. ফর্ম সাবমিট (Add অথবা Edit)
         document.getElementById('quizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // আপনার ডাটাবেস স্কিমা (q, options, ans) অনুযায়ী অবজেক্ট তৈরি
+            const id = document.getElementById('questionId').value;
             const questionData = {
                 q: document.getElementById('question').value,
                 options: [
@@ -79,30 +84,123 @@
                     document.getElementById('option2').value,
                     document.getElementById('option3').value
                 ],
-                ans: parseInt(document.getElementById('answer').value) // স্ট্রিং থেকে নাম্বারে কনভার্ট করা হলো
+                ans: parseInt(document.getElementById('answer').value),
+                category: document.getElementById('category').value
             };
 
+            let url = API_URL;
+            let method = 'POST';
+
+            if (isEditing) {
+                url = `${API_URL}/${id}`;
+                method = 'PUT';
+            }
+
             try {
-                // আপনার লাইভ Render ব্যাকএন্ড ইউআরএল
-                const response = await fetch('https://mosabber-quiz-app.onrender.com/api/questions', {
-                    method: 'POST',
+                const response = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(questionData)
                 });
-
                 const result = await response.json();
-                
-                if (result.success) {
-                    alert('অভিনন্দন! প্রশ্নটি সফলভাবে ডাটাবেসে যোগ হয়েছে।');
-                    document.getElementById('quizForm').reset(); // ফর্ম খালি করার জন্য
-                } else {
-                    alert('ভুল হয়েছে: ' + (result.error || 'Unknown Error'));
+                if(result.success) {
+                    alert(result.message);
+                    resetForm();
+                    loadQuestions();
                 }
             } catch (error) {
-                alert('সার্ভারে কানেক্ট করা যাচ্ছে না! ব্যাকএন্ড সচল আছে কিনা চেক করুন।');
-                console.error(error);
+                alert('অপারেশন ব্যর্থ হয়েছে!');
             }
         });
+
+        // ২. ডাটাবেস থেকে প্রশ্ন লোড করা
+        async function loadQuestions() {
+            const category = document.getElementById('category').value;
+            const listDiv = document.getElementById('questionsList');
+            listDiv.innerHTML = "লোড হচ্ছে...";
+
+            try {
+                const response = await fetch(`${API_URL}?category=${encodeURIComponent(category)}`);
+                const questions = await response.json();
+                
+                document.getElementById('qCount').innerText = questions.length;
+                listDiv.innerHTML = "";
+
+                if(questions.length === 0) {
+                    listDiv.innerHTML = "এই টপিকে এখনো কোনো প্রশ্ন যোগ করা হয়নি।";
+                    return;
+                }
+
+                questions.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'q-item';
+                    div.innerHTML = `
+                        <strong>${index + 1}. ${item.q}</strong><br>
+                        <ul>
+                            ${item.options.map((opt, i) => `<li style="${i === item.ans ? 'color:green; font-weight:bold;' : ''}">${opt}</li>`).join('')}
+                        </ul>
+                        <div class="action-btns">
+                            <button class="btn-primary" onclick="editQuestion('${item._id}', '${escape(item.q)}', ${JSON.stringify(item.options)}, ${item.ans})">Edit</button>
+                            <button class="btn-danger" onclick="deleteQuestion('${item._id}')">Delete</button>
+                        </div>
+                    `;
+                    listDiv.appendChild(div);
+                });
+            } catch (error) {
+                listDiv.innerHTML = "প্রশ্ন লোড করা যায়নি।";
+            }
+        }
+
+        // ৩. এডিট মোড চালু করা
+        function editQuestion(id, q, options, ans) {
+            isEditing = true;
+            document.getElementById('formTitle').innerText = "প্রশ্ন পরিবর্তন/এডিট করুন";
+            document.getElementById('submitBtn').innerText = "আপডেট করুন";
+            document.getElementById('cancelBtn').style.display = "inline-block";
+
+            document.getElementById('questionId').value = id;
+            document.getElementById('question').value = unescape(q);
+            document.getElementById('option0').value = options[0];
+            document.getElementById('option1').value = options[1];
+            document.getElementById('option2').value = options[2];
+            document.getElementById('option3').value = options[3];
+            document.getElementById('answer').value = ans;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ৪. প্রশ্ন ডিলিট করা
+        async function deleteQuestion(id) {
+            if(!confirm('আপনি কি নিশ্চিতভাবে এই প্রশ্নটি ডিলিট করতে চান?')) return;
+            try {
+                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                const result = await response.json();
+                if(result.success) {
+                    alert(result.message);
+                    loadQuestions();
+                }
+            } catch (error) {
+                alert('ডিলিট করা যায়নি।');
+            }
+        }
+
+        // ফর্ম রিসেট
+        function resetForm() {
+            isEditing = false;
+            document.getElementById('formTitle').innerText = "নতুন কুইজ প্রশ্ন যোগ করুন";
+            document.getElementById('submitBtn').innerText = "ডাটাবেসে সাবমিট করুন";
+            document.getElementById('cancelBtn').style.display = "none";
+            document.getElementById('questionId').value = "";
+            document.getElementById('question').value = "";
+            document.getElementById('option0').value = "";
+            document.getElementById('option1').value = "";
+            document.getElementById('option2').value = "";
+            document.getElementById('option3').value = "";
+            document.getElementById('answer').value = "0";
+        }
+
+        // পেজ লোড হলে প্রথম টপিকের প্রশ্ন দেখাবে
+        window.onload = loadQuestions;
     </script>
 </body>
 </html>
