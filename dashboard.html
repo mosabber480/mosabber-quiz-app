@@ -253,13 +253,26 @@
         let categoryData = {};
         let loadedQuestions = [];
 
+        // Save categories persistently to LocalStorage
+        function saveCategoryState() {
+            localStorage.setItem('my_quiz_categories_backup', JSON.stringify(categoryData));
+            renderCategoryUI();
+        }
+
         async function loadCategories() {
+            // ১. আগে LocalStorage থেকে আগের সেভ করা ক্যাটাগরিগুলো লোড করা
+            const localSaved = localStorage.getItem('my_quiz_categories_backup');
+            if (localSaved) {
+                try {
+                    categoryData = JSON.parse(localSaved);
+                } catch(e) { categoryData = {}; }
+            }
+
             try {
                 const res = await fetch(CAT_API_URL);
                 const rawCategories = await res.json();
 
-                categoryData = {};
-
+                // ২. ডাটাবেজে থাকা ক্যাটাগরি মার্চ করা
                 rawCategories.forEach(item => {
                     const parts = item.split('/');
                     const main = parts[0];
@@ -275,9 +288,10 @@
                     }
                 });
 
-                renderCategoryUI();
+                saveCategoryState();
             } catch (err) {
-                console.error("Failed to load categories", err);
+                console.error("Failed to load categories from API", err);
+                renderCategoryUI(); // API ফেল করলেও লোকাল ক্যাটাগরি ডাটা স্ক্রিনে থাকবে
             }
         }
 
@@ -382,7 +396,7 @@
 
             categoryData[catName] = {};
             input.value = "";
-            renderCategoryUI();
+            saveCategoryState();
         }
 
         function showInlineAddSub(main) {
@@ -407,7 +421,7 @@
             if (categoryData[main][subName]) { alert("Sub-category already exists!"); return; }
 
             categoryData[main][subName] = [];
-            renderCategoryUI();
+            saveCategoryState();
             toggleTree(`sub-list-${main}`);
         }
 
@@ -438,7 +452,7 @@
             if (categoryData[main][sub].includes(topic)) { alert("Topic already exists!"); return; }
 
             categoryData[main][sub].push(topic);
-            renderCategoryUI();
+            saveCategoryState();
             toggleTree(`sub-list-${main}`);
             toggleTree(`topic-list-${main}-${sub}`);
         }
@@ -463,7 +477,7 @@
 
             categoryData[inputVal] = categoryData[oldCat] || {};
             delete categoryData[oldCat];
-            renderCategoryUI();
+            saveCategoryState();
         }
 
         function enableInlineSubRename(main, oldSub) {
@@ -485,7 +499,7 @@
 
             categoryData[main][inputVal] = categoryData[main][oldSub] || [];
             delete categoryData[main][oldSub];
-            renderCategoryUI();
+            saveCategoryState();
             toggleTree(`sub-list-${main}`);
         }
 
@@ -507,7 +521,7 @@
             const idx = categoryData[main][sub].indexOf(oldTopic);
             if(idx !== -1) categoryData[main][sub][idx] = inputVal;
 
-            renderCategoryUI();
+            saveCategoryState();
             toggleTree(`sub-list-${main}`);
             toggleTree(`topic-list-${main}-${sub}`);
         }
@@ -552,14 +566,14 @@
         async function deleteCategory(catName) {
             if(!confirm(`Delete category '${catName}'?`)) return;
             delete categoryData[catName];
-            renderCategoryUI();
+            saveCategoryState();
             try { await fetch(`${CAT_API_URL}?category=${encodeURIComponent(catName)}`, { method: 'DELETE' }); } catch(e){}
         }
 
         async function deleteSubCategory(main, sub) {
             if(!confirm(`Delete sub-category '${sub}'?`)) return;
             delete categoryData[main][sub];
-            renderCategoryUI();
+            saveCategoryState();
             toggleTree(`sub-list-${main}`);
             try { await fetch(`${CAT_API_URL}?category=${encodeURIComponent(main + '/' + sub)}`, { method: 'DELETE' }); } catch(e){}
         }
@@ -567,7 +581,7 @@
         async function deleteTopic(main, sub, topic) {
             if(!confirm(`Delete topic '${topic}'?`)) return;
             categoryData[main][sub] = categoryData[main][sub].filter(t => t !== topic);
-            renderCategoryUI();
+            saveCategoryState();
             toggleTree(`sub-list-${main}`);
             toggleTree(`topic-list-${main}-${sub}`);
             try { await fetch(`${CAT_API_URL}?category=${encodeURIComponent(main + '/' + sub + '/' + topic)}`, { method: 'DELETE' }); } catch(e){}
@@ -655,7 +669,7 @@
             const targetCategoryPath = getSelectedCategoryPath();
             if(!targetCategoryPath || loadedQuestions.length === 0) return;
 
-            if(!confirm(`⚠️ WARNING: Are you sure you want to delete ALL (${loadedQuestions.length}) questions under '${targetCategoryPath}'? This action cannot be undone.`)) {
+            if(!confirm(`⚠️ WARNING: Are you sure you want to delete ALL (${loadedQuestions.length}) questions under '${targetCategoryPath}'? Category/topic will remain intact.`)) {
                 return;
             }
 
@@ -672,13 +686,14 @@
                 
                 if(res.ok && result.success) {
                     alert(`✅ All questions under '${targetCategoryPath}' deleted successfully!`);
-                    loadExistingQuestions();
+                    loadedQuestions = [];
+                    renderExistingQuestions();
                 } else {
                     alert(`❌ Failed: ${result.message || result.error || 'Could not delete questions'}`);
                 }
             } catch (err) {
                 console.error("Delete Error:", err);
-                alert("❌ Error connecting to server! Check backend console logs.");
+                alert("❌ Error connecting to server!");
             } finally {
                 btn.disabled = false;
             }
