@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const app = express();
 
+// Middleware
 app.use(express.json());
 app.use(cors());
 
@@ -13,7 +14,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected Successfully!'))
   .catch((err) => console.log('Database Error:', err));
 
-// Question Schema
+// Question Schema & Model
 const QuestionSchema = new mongoose.Schema({
     q: { type: String, required: true },
     options: { type: [String], required: true },
@@ -23,7 +24,19 @@ const QuestionSchema = new mongoose.Schema({
 
 const Question = mongoose.model('Question', QuestionSchema, 'questions');
 
-// Routes
+// ================= API ROUTES =================
+
+// 1. Get all unique categories/pages from DB
+app.get('/api/categories', async (req, res) => {
+    try {
+        const categories = await Question.distinct('category');
+        res.json(categories);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+});
+
+// 2. Get questions (All or filter by category)
 app.get('/api/questions', async (req, res) => {
     try {
         const { category } = req.query;
@@ -36,6 +49,7 @@ app.get('/api/questions', async (req, res) => {
     }
 });
 
+// 3. Add a new question
 app.post('/api/questions', async (req, res) => {
     try {
         const { q, options, ans, category } = req.body;
@@ -47,6 +61,7 @@ app.post('/api/questions', async (req, res) => {
     }
 });
 
+// 4. Update an existing question by ID
 app.put('/api/questions/:id', async (req, res) => {
     try {
         const { q, options, ans, category } = req.body;
@@ -61,6 +76,7 @@ app.put('/api/questions/:id', async (req, res) => {
     }
 });
 
+// 5. Delete a single question by ID
 app.delete('/api/questions/:id', async (req, res) => {
     try {
         await Question.findByIdAndDelete(req.params.id);
@@ -70,5 +86,6 @@ app.delete('/api/questions/:id', async (req, res) => {
     }
 });
 
+// Start Express Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
