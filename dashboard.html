@@ -129,7 +129,16 @@
         </div>
     </div>
 
-    <!-- ৩. CSV Bulk Upload Section -->
+    <!-- ৩. Existing Questions List (In-line Edit & Delete) - Opore Niye Aasa Hoyeche -->
+    <div class="box" style="border-left: 6px solid #ffc107;">
+        <h2>✏️ Manage Existing Questions (Edit / Delete)</h2>
+        <p style="color: #666; font-size: 14px;">Selected Topic: <b id="selectedTopicLabel">None</b></p>
+        <div id="existingQuestionsContainer">
+            <p style="color:#888;">Select a category above to view and edit questions.</p>
+        </div>
+    </div>
+
+    <!-- ৪. CSV Bulk Upload Section - Niche Namano Hoyeche -->
     <div class="box" style="border-left: 6px solid #17a2b8;">
         <h3>📤 Bulk Upload Questions via CSV / Excel</h3>
         <form id="csvUploadForm">
@@ -141,7 +150,7 @@
         </form>
     </div>
 
-    <!-- ৪. Manual MCQ Builder Section -->
+    <!-- ৫. Manual MCQ Builder Section -->
     <div class="box">
         <h2>📝 Manual Quiz Builder</h2>
         <form id="masterQuizForm">
@@ -149,15 +158,6 @@
             <button type="button" class="btn btn-add" onclick="addMCQField()">➕ Add More MCQ</button>
             <button type="submit" class="btn btn-submit">🚀 Submit All Questions</button>
         </form>
-    </div>
-
-    <!-- ৫. Existing Questions List (In-line Edit & Delete) -->
-    <div class="box" style="border-left: 6px solid #ffc107;">
-        <h2>✏️ Manage Existing Questions (Edit / Delete)</h2>
-        <p style="color: #666; font-size: 14px;">Selected Topic: <b id="selectedTopicLabel">None</b></p>
-        <div id="existingQuestionsContainer">
-            <p style="color:#888;">Select a category above to view and edit questions.</p>
-        </div>
     </div>
 
     <script>
