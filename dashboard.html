@@ -353,10 +353,10 @@
             }
         }
 
-        // Helper to convert index 0,1,2,3 to Letter (a, b, c, d)
-        function getLetter(index) {
-            const letters = ['a', 'b', 'c', 'd'];
-            return letters[index] || index;
+        // Helper to convert index 0,1,2,3 to Bangla Letter (ক, খ, গ, ঘ)
+        function getBanglaLetter(index) {
+            const banglaLetters = ['ক', 'খ', 'গ', 'ঘ'];
+            return banglaLetters[index] || index;
         }
 
         // Render Normal Cards
@@ -375,8 +375,8 @@
                 card.innerHTML = `
                     <strong>Q${index + 1}:</strong> ${q.q}<br>
                     <small style="color:#555; display:block; margin-top:4px;">
-                        <b>Options:</b> (a) ${q.options[0]} | (b) ${q.options[1]} | (c) ${q.options[2]} | (d) ${q.options[3]} 
-                        <span style="color:#28a745; margin-left:10px;"><b>[ Correct Ans: (${getLetter(q.ans)}) ]</b></span>
+                        <b>Options:</b> (ক) ${q.options[0]} | (খ) ${q.options[1]} | (গ) ${q.options[2]} | (ঘ) ${q.options[3]} 
+                        <span style="color:#28a745; margin-left:10px;"><b>[ সঠিক উত্তর: (${getBanglaLetter(q.ans)}) ]</b></span>
                     </small>
                     <small style="color:#777; display:block; margin-top:2px;"><b>Explanation:</b> ${q.explanation || 'None'}</small>
                     <div class="q-actions">
@@ -388,7 +388,7 @@
             });
         }
 
-        // --- IN-LINE EDITING WITH a, b, c, d LABELS ---
+        // --- IN-LINE EDITING WITH (ক), (খ), (গ), (ঘ) LABELS ---
         function enableInlineEdit(id, index) {
             const q = loadedQuestions[index];
             const card = document.getElementById(`q-card-${id}`);
@@ -406,20 +406,20 @@
                 
                 <label>Options (4 Choices):</label>
                 <div class="options-grid">
-                    <input type="text" id="edit-opt-0-${id}" value="${(q.options[0]||'').replace(/"/g, '&quot;')}" placeholder="Option (a)" required>
-                    <input type="text" id="edit-opt-1-${id}" value="${(q.options[1]||'').replace(/"/g, '&quot;')}" placeholder="Option (b)" required>
-                    <input type="text" id="edit-opt-2-${id}" value="${(q.options[2]||'').replace(/"/g, '&quot;')}" placeholder="Option (c)" required>
-                    <input type="text" id="edit-opt-3-${id}" value="${(q.options[3]||'').replace(/"/g, '&quot;')}" placeholder="Option (d)" required>
+                    <input type="text" id="edit-opt-0-${id}" value="${(q.options[0]||'').replace(/"/g, '&quot;')}" placeholder="অপশন (ক)" required>
+                    <input type="text" id="edit-opt-1-${id}" value="${(q.options[1]||'').replace(/"/g, '&quot;')}" placeholder="অপশন (খ)" required>
+                    <input type="text" id="edit-opt-2-${id}" value="${(q.options[2]||'').replace(/"/g, '&quot;')}" placeholder="অপশন (গ)" required>
+                    <input type="text" id="edit-opt-3-${id}" value="${(q.options[3]||'').replace(/"/g, '&quot;')}" placeholder="অপশন (ঘ)" required>
                 </div>
                 
                 <div class="ans-explanation-row">
                     <div class="form-group">
                         <label>Correct Answer:</label>
                         <select id="edit-ans-${id}" required>
-                            <option value="0" ${q.ans === 0 ? 'selected' : ''}>Option (a)</option>
-                            <option value="1" ${q.ans === 1 ? 'selected' : ''}>Option (b)</option>
-                            <option value="2" ${q.ans === 2 ? 'selected' : ''}>Option (c)</option>
-                            <option value="3" ${q.ans === 3 ? 'selected' : ''}>Option (d)</option>
+                            <option value="0" ${q.ans === 0 ? 'selected' : ''}>অপশন (ক)</option>
+                            <option value="1" ${q.ans === 1 ? 'selected' : ''}>অপশন (খ)</option>
+                            <option value="2" ${q.ans === 2 ? 'selected' : ''}>অপশন (গ)</option>
+                            <option value="3" ${q.ans === 3 ? 'selected' : ''}>অপশন (ঘ)</option>
                         </select>
                     </div>
 
@@ -523,7 +523,7 @@
             }
         });
 
-        // --- Manual MCQ Fields Logics WITH (a), (b), (c), (d) LABELS ---
+        // --- Manual MCQ Fields Logics WITH (ক), (খ), (গ), (ঘ) LABELS ---
         function addMCQField() {
             mcqCount++;
             const container = document.getElementById('mcqContainer');
@@ -542,20 +542,20 @@
                 
                 <label>Options (4 Choices):</label>
                 <div class="options-grid">
-                    <input type="text" class="opt-0" placeholder="Option (a)" required>
-                    <input type="text" class="opt-1" placeholder="Option (b)" required>
-                    <input type="text" class="opt-2" placeholder="Option (c)" required>
-                    <input type="text" class="opt-3" placeholder="Option (d)" required>
+                    <input type="text" class="opt-0" placeholder="অপশন (ক)" required>
+                    <input type="text" class="opt-1" placeholder="অপশন (খ)" required>
+                    <input type="text" class="opt-2" placeholder="অপশন (গ)" required>
+                    <input type="text" class="opt-3" placeholder="অপশন (ঘ)" required>
                 </div>
                 
                 <div class="ans-explanation-row">
                     <div class="form-group">
                         <label>Correct Answer:</label>
                         <select class="ans-input" required>
-                            <option value="0">Option (a)</option>
-                            <option value="1">Option (b)</option>
-                            <option value="2">Option (c)</option>
-                            <option value="3">Option (d)</option>
+                            <option value="0">অপশন (ক)</option>
+                            <option value="1">অপশন (খ)</option>
+                            <option value="2">অপশন (গ)</option>
+                            <option value="3">অপশন (ঘ)</option>
                         </select>
                     </div>
 
