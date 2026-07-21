@@ -3,34 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Developing - Quiz Dashboard</title>
+    <title>Custom Developing - Master Dashboard</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; background-color: #f4f7f6; max-width: 800px; margin: 0 auto; }
-        .box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { text-align: center; color: #333; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 25px; background-color: #f4f7f6; max-width: 850px; margin: 0 auto; }
+        .box { background: white; padding: 20px 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h2, h3 { color: #333; margin-top: 0; }
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
         input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
         .mcq-block { background: #f9f9f9; padding: 20px; border-radius: 6px; border-left: 5px solid #007bff; margin-bottom: 20px; position: relative; }
         .mcq-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #007bff; }
-        .btn { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        
+        .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; }
         .btn-add { background-color: #007bff; color: white; margin-bottom: 20px; width: 100%; }
         .btn-submit { background-color: #28a745; color: white; width: 100%; }
-        .btn-danger { background-color: #dc3545; color: white; position: absolute; top: 15px; right: 15px; padding: 5px 10px; font-size: 12px; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        
+        /* Category Management UI */
+        .cat-input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .cat-list { list-style: none; padding: 0; margin: 0; }
+        .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 4px; margin-bottom: 8px; border: 1px solid #e9ecef; }
     </style>
 </head>
 <body>
 
+    <!-- ১. Page / Category Manager Section -->
     <div class="box">
-        <h2>Dynamic Quiz Builder</h2>
-        <p style="text-align: center; color: #666;">Select category, add questions, and click submit.</p>
+        <h3>📂 Manage Pages / Categories</h3>
+        <p style="color: #666; font-size: 14px;">Create, edit name, or delete quiz pages dynamically.</p>
+        
+        <div class="cat-input-group">
+            <input type="text" id="newPageName" placeholder="Enter page name (e.g. page-1, page-2, science-1)">
+            <button type="button" class="btn btn-add" style="width: auto; margin:0;" onclick="createPage()">+ Create Page</button>
+        </div>
+
+        <label>Available Pages in Database:</label>
+        <ul class="cat-list" id="categoryList">
+            <li>Loading pages...</li>
+        </ul>
+    </div>
+
+    <!-- ২. MCQ Builder Section -->
+    <div class="box">
+        <h2>📝 Dynamic Quiz Builder</h2>
+        <p style="text-align: center; color: #666;">Select target page, add questions, and click submit.</p>
         
         <div class="form-group">
-            <label>Select Category / Page:</label>
+            <label>Select Target Page:</label>
             <select id="mainCategory" required>
-                <option value="page-1">page-1</option>
-                <option value="page-2">page-2</option>
-                <option value="page-3">page-3</option>
+                <!-- Categories will be dynamically loaded here -->
             </select>
         </div>
         
@@ -46,7 +69,105 @@
     <script>
         let mcqCount = 0;
         const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
+        const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
 
+        // --- Category Management Logics ---
+        async function loadCategories() {
+            const catSelect = document.getElementById('mainCategory');
+            const catList = document.getElementById('categoryList');
+            
+            try {
+                const res = await fetch(CAT_API_URL);
+                const categories = await res.json();
+
+                catSelect.innerHTML = "";
+                catList.innerHTML = "";
+
+                if (categories.length === 0) {
+                    catSelect.innerHTML = `<option value="">No pages available. Create one above!</option>`;
+                    catList.innerHTML = `<li style="color:#888;">No active pages found in database.</li>`;
+                    return;
+                }
+
+                categories.forEach(cat => {
+                    // Select Dropdown Populating
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.innerText = cat;
+                    catSelect.appendChild(option);
+
+                    // List Displaying
+                    const li = document.createElement('li');
+                    li.className = 'cat-item';
+                    li.innerHTML = `
+                        <span><strong>${cat}</strong></span>
+                        <div>
+                            <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deletePage('${cat}')">Delete Page</button>
+                        </div>
+                    `;
+                    catList.appendChild(li);
+                });
+
+            } catch (err) {
+                console.error("Failed to load categories", err);
+            }
+        }
+
+        function createPage() {
+            const pageInput = document.getElementById('newPageName');
+            const pageName = pageInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+            
+            if(!pageName) {
+                alert("Please enter a valid page name!");
+                return;
+            }
+
+            const catSelect = document.getElementById('mainCategory');
+            
+            // Check if already exists in select dropdown
+            let exists = false;
+            for (let opt of catSelect.options) {
+                if (opt.value === pageName) exists = true;
+            }
+
+            if (!exists) {
+                const newOption = new Option(pageName, pageName, true, true);
+                catSelect.add(newOption);
+                
+                // Add dummy item entry indicator
+                const catList = document.getElementById('categoryList');
+                const li = document.createElement('li');
+                li.className = 'cat-item';
+                li.innerHTML = `<span><strong>${pageName}</strong> (New - Ready for questions)</span>`;
+                catList.appendChild(li);
+
+                pageInput.value = "";
+                alert(`Page '${pageName}' created! Now you can add questions under this page below.`);
+            } else {
+                alert("This page name already exists!");
+            }
+        }
+
+        async function deletePage(pageName) {
+            if(!confirm(`Are you sure you want to delete page '${pageName}' and all its questions?`)) return;
+
+            try {
+                // Fetch all questions under this category to delete
+                const res = await fetch(`${API_URL}?category=${encodeURIComponent(pageName)}`);
+                const questions = await res.json();
+
+                for (let q of questions) {
+                    await fetch(`${API_URL}/${q._id}`, { method: 'DELETE' });
+                }
+
+                alert(`Page '${pageName}' and its questions deleted successfully!`);
+                loadCategories();
+            } catch (err) {
+                alert("Error deleting page!");
+            }
+        }
+
+        // --- MCQ Fields Logics ---
         function addMCQField() {
             mcqCount++;
             const container = document.getElementById('mcqContainer');
@@ -56,11 +177,11 @@
             
             mcqBlock.innerHTML = `
                 <div class="mcq-title">MCQ #${mcqCount}</div>
-                ${mcqCount > 1 ? `<button type="button" class="btn btn-danger" onclick="removeMCQField(${mcqCount})">Remove</button>` : ''}
+                ${mcqCount > 1 ? `<button type="button" class="btn btn-danger" style="position:absolute; top:15px; right:15px; padding:4px 8px; font-size:12px;" onclick="removeMCQField(${mcqCount})">Remove</button>` : ''}
                 
                 <div class="form-group">
                     <label>Question:</label>
-                    <input type="text" class="q-input" placeholder="e.g. What is the past tense of 'go'?" required>
+                    <input type="text" class="q-input" placeholder="e.g. What is the capital of France?" required>
                 </div>
                 
                 <div class="form-group"><input type="text" class="opt-0" placeholder="Option 1 (Index 0)" required></div>
@@ -86,11 +207,16 @@
             if(block) block.remove();
         }
 
-        window.onload = function() { addMCQField(); };
-
+        // --- Submit Logics ---
         document.getElementById('masterQuizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const category = document.getElementById('mainCategory').value;
+            
+            if(!category) {
+                alert("Please select or create a page first!");
+                return;
+            }
+
             const mcqBlocks = document.querySelectorAll('.mcq-block');
             let successCount = 0;
             let hasError = false;
@@ -130,14 +256,20 @@
             submitBtn.disabled = false;
 
             if (!hasError) {
-                alert(`Success! ${successCount} questions saved to database.`);
+                alert(`Success! ${successCount} questions saved under '${category}'.`);
                 document.getElementById('mcqContainer').innerHTML = "";
                 mcqCount = 0;
                 addMCQField();
+                loadCategories(); // Reload category list
             } else {
                 alert(`Added ${successCount} questions, but encountered issues with some.`);
             }
         });
+
+        window.onload = function() { 
+            loadCategories();
+            addMCQField(); 
+        };
     </script>
 </body>
 </html>

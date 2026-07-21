@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Developing - Dynamic Quiz</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; background-color: #f4f7f6; max-width: 750px; margin: 0 auto; }
+        .header-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; }
+        h2 { color: #333; margin: 0 0 10px 0; text-transform: capitalize; }
+        .quiz-card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .question { font-weight: bold; font-size: 17px; margin-bottom: 12px; color: #222; }
+        .options { list-style-type: none; padding: 0; margin: 0; }
+        .options li { background: #f8f9fa; border: 1px solid #dee2e6; margin: 8px 0; padding: 12px 15px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+        .options li:hover { background: #e9ecef; }
+        .correct { background: #28a745 !important; color: white; border-color: #28a745 !important; }
+        .wrong { background: #dc3545 !important; color: white; border-color: #dc3545 !important; }
+        .btn-back { display: inline-block; margin-top: 10px; color: #007bff; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header-box">
+        <h2 id="pageTitle">Loading Topic...</h2>
+        <a href="index.html" class="btn-back">⬅️ Back to All Topics</a>
+    </div>
+
+    <div id="quizContainer">Loading questions from database...</div>
+
+    <script>
+        // Get category parameter from URL (e.g. quiz.html?category=page-1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentCategory = urlParams.get('category');
+
+        const API_URL = currentCategory 
+            ? `https://mosabber-quiz-app.onrender.com/api/questions?category=${encodeURIComponent(currentCategory)}`
+            : null;
+
+        async function fetchQuestions() {
+            const container = document.getElementById('quizContainer');
+            const titleElem = document.getElementById('pageTitle');
+
+            if (!currentCategory) {
+                titleElem.innerText = "No Category Selected!";
+                container.innerHTML = "<p style='text-align:center;'>Please select a topic from home page.</p>";
+                return;
+            }
+
+            titleElem.innerText = `Topic: ${currentCategory}`;
+
+            try {
+                const response = await fetch(API_URL);
+                const questions = await response.json();
+
+                if (questions.length === 0) {
+                    container.innerHTML = `<div class="quiz-card"><p style="text-align:center;">No questions found under <b>${currentCategory}</b>. Add some from Dashboard!</p></div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                questions.forEach((item, qIndex) => {
+                    const card = document.createElement('div');
+                    card.className = 'quiz-card';
+                    
+                    let optionsHTML = item.options.map((opt, oIndex) => 
+                        `<li onclick="checkAnswer(this, ${oIndex}, ${item.ans})">${opt}</li>`
+                    ).join('');
+
+                    card.innerHTML = `
+                        <div class="question">${qIndex + 1}. ${item.q}</div>
+                        <ul class="options">${optionsHTML}</ul>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                container.innerHTML = "<p style='text-align:center; color:red;'>Error loading questions from server!</p>";
+            }
+        }
+
+        function checkAnswer(element, selectedIndex, correctIndex) {
+            const parent = element.parentElement;
+            const items = parent.querySelectorAll('li');
+            
+            // Disable further clicks on this question
+            items.forEach(li => li.style.pointerEvents = 'none');
+
+            if (selectedIndex === correctIndex) {
+                element.className = 'correct';
+            } else {
+                element.className = 'wrong';
+                items[correctIndex].className = 'correct';
+            }
+        }
+
+        window.onload = fetchQuestions;
+    </script>
+</body>
+</html>

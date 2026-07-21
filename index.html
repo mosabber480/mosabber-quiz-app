@@ -19,57 +19,80 @@
             background: white; 
             padding: 35px 30px; 
             border-radius: 12px; 
-            max-width: 450px; 
+            max-width: 500px; 
             width: 100%;
             box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
             text-align: center;
         }
-        h1 { 
-            color: #333; 
-            font-size: 26px; 
-            margin-bottom: 8px; 
-        }
-        p { 
-            color: #666; 
-            font-size: 14px; 
-            margin-bottom: 25px; 
-        }
-        .btn-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-        }
-        a { 
+        h1 { color: #333; font-size: 26px; margin-bottom: 8px; }
+        p { color: #666; font-size: 14px; margin-bottom: 25px; }
+        
+        .cat-title { text-align: left; font-size: 16px; font-weight: bold; margin: 20px 0 10px; color: #444; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        
+        .btn-group { display: flex; flex-direction: column; gap: 10px; }
+        a.topic-btn { 
             display: block; 
-            padding: 14px; 
+            padding: 12px; 
             background: #007bff; 
             color: white; 
             text-decoration: none; 
             border-radius: 6px; 
             font-weight: bold; 
             font-size: 15px;
-            transition: background 0.3s ease;
+            text-transform: capitalize;
+            transition: background 0.2s ease;
         }
-        a:hover { background: #0056b3; }
+        a.topic-btn:hover { background: #0056b3; }
+        
         a.btn-dashboard { 
             background: #28a745; 
+            margin-top: 10px;
         }
-        a.btn-dashboard:hover { 
-            background: #218838; 
-        }
+        a.btn-dashboard:hover { background: #218838; }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h1>Custom Developing</h1>
-        <p>Welcome to the Quiz Practice & Management Portal</p>
-        
-        <div class="btn-group">
-            <a href="page-1.html">📖 Start Page 1 Quiz</a>
-            <a href="dashboard.html" class="btn-dashboard">⚙️ Admin Dashboard</a>
+        <p>Quiz Practice & Management Portal</p>
+
+        <a href="dashboard.html" class="topic-btn btn-dashboard">⚙️ Open Admin Dashboard</a>
+
+        <div class="cat-title">Available Quiz Topics:</div>
+        <div class="btn-group" id="topicsList">
+            <p style="color:#888;">Loading topics...</p>
         </div>
     </div>
 
+    <script>
+        const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
+
+        async function loadTopics() {
+            const container = document.getElementById('topicsList');
+            try {
+                const res = await fetch(CAT_API_URL);
+                const categories = await res.json();
+
+                if (categories.length === 0) {
+                    container.innerHTML = "<p style='color:#888;'>No active topics yet. Create one from Dashboard!</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+                categories.forEach(cat => {
+                    const a = document.createElement('a');
+                    a.className = 'topic-btn';
+                    a.href = `quiz.html?category=${encodeURIComponent(cat)}`;
+                    a.innerText = `📖 ${cat}`;
+                    container.appendChild(a);
+                });
+            } catch (err) {
+                container.innerHTML = "<p style='color:red;'>Failed to load topics.</p>";
+            }
+        }
+
+        window.onload = loadTopics;
+    </script>
 </body>
 </html>
