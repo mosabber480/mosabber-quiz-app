@@ -12,12 +12,10 @@ const upload = multer({ dest: 'uploads/' });
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
-const MONGO_URI = process.env.MONGO_URI || 'YOUR_MONGODB_CONNECTION_STRING_HERE';
-mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+// MongoDB Connection with your URI
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://mosabber480_db_user:lKwH9F8nO2BzxpKx@mosabber.3ajdj0u.mongodb.net/quizDB?retryWrites=true&w=majority';
+
+mongoose.connect(MONGO_URI)
 .then(() => console.log('MongoDB Connected Successfully'))
 .catch(err => console.error('MongoDB Connection Error:', err));
 
@@ -27,7 +25,7 @@ const questionSchema = new mongoose.Schema({
     options: { type: [String], required: true },
     ans: { type: Number, required: true },
     explanation: { type: String, default: "" },
-    category: { type: String, required: true } // Stores format: "main/sub/topic"
+    category: { type: String, required: true } // Format: "main/sub/topic"
 }, { timestamps: true });
 
 const Question = mongoose.model('Question', questionSchema);
@@ -120,7 +118,6 @@ app.delete('/api/categories', async (req, res) => {
             return res.status(400).json({ success: false, message: "Category parameter is required" });
         }
         
-        // RegEx to delete exact category path or sub-paths (e.g. prili or prili/bangla)
         const regex = new RegExp(`^${category}(/|$)`);
         const result = await Question.deleteMany({ category: regex });
         
@@ -141,7 +138,6 @@ app.post('/api/questions/upload-csv', upload.single('file'), (req, res) => {
     fs.createReadStream(req.file.path)
         .pipe(csv())
         .on('data', (data) => {
-            // Expected CSV format: Question,OptionA,OptionB,OptionC,OptionD,AnswerIndex,Explanation
             results.push({
                 q: data.Question || data.q,
                 options: [
@@ -158,7 +154,7 @@ app.post('/api/questions/upload-csv', upload.single('file'), (req, res) => {
         .on('end', async () => {
             try {
                 await Question.insertMany(results);
-                fs.unlinkSync(req.file.path); // Delete local temp file
+                fs.unlinkSync(req.file.path);
                 res.status(200).json({ success: true, count: results.length });
             } catch (err) {
                 if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
