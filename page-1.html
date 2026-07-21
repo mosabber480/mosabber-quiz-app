@@ -3,141 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Developing - Quiz Dashboard</title>
+    <title>Custom Developing - Page 1 Quiz</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; background-color: #f4f7f6; max-width: 800px; margin: 0 auto; }
-        .box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { text-align: center; color: #333; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .mcq-block { background: #f9f9f9; padding: 20px; border-radius: 6px; border-left: 5px solid #007bff; margin-bottom: 20px; position: relative; }
-        .mcq-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #007bff; }
-        .btn { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .btn-add { background-color: #007bff; color: white; margin-bottom: 20px; width: 100%; }
-        .btn-submit { background-color: #28a745; color: white; width: 100%; }
-        .btn-danger { background-color: #dc3545; color: white; position: absolute; top: 15px; right: 15px; padding: 5px 10px; font-size: 12px; }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; max-width: 700px; margin: 0 auto; }
+        .quiz-card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .question { font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+        .options { list-style-type: none; padding: 0; }
+        .options li { background: #f0f0f0; margin: 5px 0; padding: 10px; border-radius: 4px; cursor: pointer; }
+        .options li:hover { background: #e0e0e0; }
+        .correct { background: #28a745 !important; color: white; }
+        .wrong { background: #dc3545 !important; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h2>Dynamic Quiz Builder</h2>
-        <p style="text-align: center; color: #666;">Select category, add questions, and click submit.</p>
-        
-        <div class="form-group">
-            <label>Select Category / Page:</label>
-            <select id="mainCategory" required>
-                <option value="page-1">page-1</option>
-                <option value="page-2">page-2</option>
-                <option value="page-3">page-3</option>
-            </select>
-        </div>
-        
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-
-        <form id="masterQuizForm">
-            <div id="mcqContainer"></div>
-            <button type="button" class="btn btn-add" onclick="addMCQField()">➕ Add More MCQ</button>
-            <button type="submit" class="btn btn-submit">🚀 Submit All Questions</button>
-        </form>
-    </div>
+    <h2>Custom Developing - Page 1 Quiz Practice</h2>
+    <div id="quizContainer">Loading questions from database...</div>
 
     <script>
-        let mcqCount = 0;
-        const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
+        const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions?category=page-1';
 
-        function addMCQField() {
-            mcqCount++;
-            const container = document.getElementById('mcqContainer');
-            const mcqBlock = document.createElement('div');
-            mcqBlock.className = 'mcq-block';
-            mcqBlock.id = `mcq-block-${mcqCount}`;
-            
-            mcqBlock.innerHTML = `
-                <div class="mcq-title">MCQ #${mcqCount}</div>
-                ${mcqCount > 1 ? `<button type="button" class="btn btn-danger" onclick="removeMCQField(${mcqCount})">Remove</button>` : ''}
-                
-                <div class="form-group">
-                    <label>Question:</label>
-                    <input type="text" class="q-input" placeholder="e.g. What is the past tense of 'go'?" required>
-                </div>
-                
-                <div class="form-group"><input type="text" class="opt-0" placeholder="Option 1 (Index 0)" required></div>
-                <div class="form-group"><input type="text" class="opt-1" placeholder="Option 2 (Index 1)" required></div>
-                <div class="form-group"><input type="text" class="opt-2" placeholder="Option 3 (Index 2)" required></div>
-                <div class="form-group"><input type="text" class="opt-3" placeholder="Option 4 (Index 3)" required></div>
-                
-                <div class="form-group">
-                    <label>Correct Answer Index:</label>
-                    <select class="ans-input" required>
-                        <option value="0">Option 1 (Index 0)</option>
-                        <option value="1">Option 2 (Index 1)</option>
-                        <option value="2">Option 3 (Index 2)</option>
-                        <option value="3">Option 4 (Index 3)</option>
-                    </select>
-                </div>
-            `;
-            container.appendChild(mcqBlock);
-        }
+        async function fetchQuestions() {
+            const container = document.getElementById('quizContainer');
+            try {
+                const response = await fetch(API_URL);
+                const questions = await response.json();
 
-        function removeMCQField(id) {
-            const block = document.getElementById(`mcq-block-${id}`);
-            if(block) block.remove();
-        }
-
-        window.onload = function() { addMCQField(); };
-
-        document.getElementById('masterQuizForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const category = document.getElementById('mainCategory').value;
-            const mcqBlocks = document.querySelectorAll('.mcq-block');
-            let successCount = 0;
-            let hasError = false;
-
-            const submitBtn = document.querySelector('.btn-submit');
-            submitBtn.innerText = "Saving Data... Please wait...";
-            submitBtn.disabled = true;
-
-            for (let block of mcqBlocks) {
-                const questionData = {
-                    q: block.querySelector('.q-input').value,
-                    options: [
-                        block.querySelector('.opt-0').value,
-                        block.querySelector('.opt-1').value,
-                        block.querySelector('.opt-2').value,
-                        block.querySelector('.opt-3').value
-                    ],
-                    ans: parseInt(block.querySelector('.ans-input').value),
-                    category: category
-                };
-
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(questionData)
-                    });
-                    const result = await response.json();
-                    if (result.success) successCount++;
-                    else hasError = true;
-                } catch (error) {
-                    hasError = true;
+                if (questions.length === 0) {
+                    container.innerHTML = "<p>No questions found for Page 1. Add some from Dashboard!</p>";
+                    return;
                 }
+
+                container.innerHTML = "";
+                questions.forEach((item, qIndex) => {
+                    const card = document.createElement('div');
+                    card.className = 'quiz-card';
+                    
+                    let optionsHTML = item.options.map((opt, oIndex) => 
+                        `<li onclick="checkAnswer(this, ${oIndex}, ${item.ans})">${opt}</li>`
+                    ).join('');
+
+                    card.innerHTML = `
+                        <div class="question">${qIndex + 1}. ${item.q}</div>
+                        <ul class="options">${optionsHTML}</ul>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                container.innerHTML = "<p>Error loading questions!</p>";
             }
+        }
 
-            submitBtn.innerText = "🚀 Submit All Questions";
-            submitBtn.disabled = false;
+        function checkAnswer(element, selectedIndex, correctIndex) {
+            const parent = element.parentElement;
+            const items = parent.querySelectorAll('li');
+            
+            // Disable further clicks on this question
+            items.forEach(li => li.style.pointerEvents = 'none');
 
-            if (!hasError) {
-                alert(`Success! ${successCount} questions saved to database.`);
-                document.getElementById('mcqContainer').innerHTML = "";
-                mcqCount = 0;
-                addMCQField();
+            if (selectedIndex === correctIndex) {
+                element.className = 'correct';
             } else {
-                alert(`Added ${successCount} questions, but encountered issues with some.`);
+                element.className = 'wrong';
+                items[correctIndex].className = 'correct';
             }
-        });
+        }
+
+        window.onload = fetchQuestions;
     </script>
 </body>
 </html>
