@@ -13,22 +13,21 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Uploads directory setup for CSV processing
+// Uploads directory setup
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 const upload = multer({ dest: 'uploads/' });
 
-// --- MongoDB Database Connection ---
-// Render-এ Environment Variable হিসেবে MONGO_URI থাকলে সেটা নেবে, নাহলে নিচের লিংকে কানেক্ট হবে
+// MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || "YOUR_MONGODB_ATLAS_CONNECTION_STRING";
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB Atlas'))
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
-// --- Mongoose Schema & Model ---
+// Schema & Model
 const QuestionSchema = new mongoose.Schema({
     q: { type: String, required: true },
     options: [{ type: String, required: true }],
@@ -41,7 +40,7 @@ const Question = mongoose.model('Question', QuestionSchema);
 
 // --- API ENDPOINTS ---
 
-// 1. GET ALL QUESTIONS OR FILTER BY CATEGORY
+// 1. Get Questions (Optionally filter by category)
 app.get('/api/questions', async (req, res) => {
     try {
         const { category } = req.query;
@@ -49,14 +48,14 @@ app.get('/api/questions', async (req, res) => {
         if (category) {
             query.category = category;
         }
-        const questions = await Question.find(query);
+        const questions = await Question.find(query).sort({ createdAt: -1 });
         res.json(questions);
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 2. GET ALL UNIQUE CATEGORIES
+// 2. Get All Unique Categories
 app.get('/api/categories', async (req, res) => {
     try {
         const categories = await Question.distinct('category');
@@ -66,7 +65,7 @@ app.get('/api/categories', async (req, res) => {
     }
 });
 
-// 3. POST SINGLE QUESTION
+// 3. Post Single Question
 app.post('/api/questions', async (req, res) => {
     try {
         const { q, options, ans, explanation, category } = req.body;
@@ -78,16 +77,55 @@ app.post('/api/questions', async (req, res) => {
     }
 });
 
-// 4. POST CSV FILE UPLOAD (BULK INSERT)
-app.post('/api/questions/upload-csv', upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: "No CSV file uploaded!" });
+// 4. Update/Edit Question by ID
+app.put('/api/questions/:id', async (req, res) => {
+    try {
+        const { q, options, ans, explanation, category } = req.body;
+        const updatedQuestion = await Question.findByIdAndUpdate(
+            req.params.id,
+            { q, options, ans, explanation, category },
+            { new: true }
+        );
+        res.json({ success: true, data: updatedQuestion });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
     }
+});
+
+// 5. Delete Single Question by ID
+app.delete('/api/questions/:id', async (req, res) => {
+    try {
+        await Question.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: "Question deleted successfully." });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 6. Delete Entire Category or Sub-Category in One Query
+app.delete('/api/categories', async (req, res) => {
+    try {
+        const { category } = req.query;
+        if (!category) return res.status(400).json({ success: false, message: "Category query required" });
+
+        // Regex match for category or category/subCategory
+        const regex = new RegExp(`^${category}(/|$)`, 'i');
+        const result = await Question.deleteMany({ category: { $regex: regex } });
+
+        res.json({ success: true, message: `Deleted ${result.deletedCount} questions under '${category}'` });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 7. CSV File Upload
+app.post('/api/questions/upload-csv', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false, message: "No CSV file uploaded!" });
 
     const category = req.body.category;
     if (!category) {
         if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        return res.status(400).json({ success: false, message: "Category is required!" });
+        return res.status(400).json({ success: false, message: "Category path is required!" });
     }
 
     const results = [];
@@ -120,11 +158,7 @@ app.post('/api/questions/upload-csv', upload.single('file'), (req, res) => {
                 await Question.insertMany(results);
                 if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
 
-                res.json({ 
-                    success: true, 
-                    message: `Successfully added ${results.length} questions!`, 
-                    count: results.length 
-                });
+                res.json({ success: true, message: `Successfully added ${results.length} questions!`, count: results.length });
             } catch (err) {
                 if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
                 res.status(500).json({ success: false, error: err.message });
@@ -136,16 +170,4 @@ app.post('/api/questions/upload-csv', upload.single('file'), (req, res) => {
         });
 });
 
-// 5. DELETE A QUESTION
-app.delete('/api/questions/:id', async (req, res) => {
-    try {
-        await Question.findByIdAndDelete(req.params.id);
-        res.json({ success: true, message: "Question deleted successfully." });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
