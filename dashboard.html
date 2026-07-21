@@ -133,13 +133,24 @@
             border-left: 3px solid #28a745;
         }
 
+        /* Inline Add Forms */
+        .inline-add-box {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #eef6ff;
+            border-radius: 5px;
+            margin: 6px 0 8px 0;
+            border: 1px solid #b6d4fe;
+        }
+
         .edit-input {
             padding: 4px 8px;
             font-size: 14px;
             border: 1px solid #007bff;
             border-radius: 4px;
             width: auto;
-            max-width: 200px;
+            max-width: 250px;
         }
 
         .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ffc107; }
@@ -151,12 +162,13 @@
             .cat-select-row { flex-direction: column; max-width: 100%; }
             .cat-input-group { flex-direction: column; }
             .btn-cat-add { width: 100%; }
+            .inline-add-box { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ১. Category & Sub-Category Manager Section (3-Level Tree View) -->
+    <!-- ১. Category & Sub-Category Manager Section -->
     <div class="box">
         <h3>📂 Manage Categories, Sub-Categories & Topics</h3>
         <p style="color: #666; font-size: 14px;">Structure: <b>Main Category &gt; Sub-Category &gt; Topic</b>. Click on items to expand levels.</p>
@@ -171,7 +183,7 @@
         </ul>
     </div>
 
-    <!-- ২. Target Selection (3-Level Cascade) -->
+    <!-- ২. Target Selection -->
     <div class="box">
         <h2>🎯 Select Target Topic</h2>
         <div class="cat-select-row">
@@ -231,7 +243,6 @@
         const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
         const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
 
-        // Structure: categoryData = { "prili": { "bangla": ["sondhi", "karok"], "english": ["grammar"] } }
         let categoryData = {};
         let loadedQuestions = [];
 
@@ -263,7 +274,6 @@
             }
         }
 
-        // Render 3-Level Tree-View
         function renderCategoryUI() {
             const treeContainer = document.getElementById('categoryTreeList');
             const mainSelect = document.getElementById('mainCategory');
@@ -301,7 +311,7 @@
                                         </div>
                                     </li>
                                 `;
-                            } );
+                            });
                         } else {
                             topicTreeHTML = `<li class="topic-item" style="color:#888; font-size:12px;">No topics in this sub-category.</li>`;
                         }
@@ -311,11 +321,12 @@
                                 <div class="sub-header" onclick="toggleTree('topic-list-${main}-${sub}')">
                                     <span id="sub-title-${main}-${sub}">📂 <b>${sub}</b> <small style="color:#666;">(${topics.length} topics)</small></span>
                                     <div class="cat-actions" id="sub-actions-${main}-${sub}">
-                                        <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); promptAddTopic('${main}', '${sub}')">+ Add Topic</button>
+                                        <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); showInlineAddTopic('${main}', '${sub}')">+ Add Topic</button>
                                         <button class="btn btn-warning" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); enableInlineSubRename('${main}', '${sub}')">✏️ Rename</button>
                                         <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); deleteSubCategory('${main}', '${sub}')">🗑️ Delete</button>
                                     </div>
                                 </div>
+                                <div id="inline-topic-input-container-${main}-${sub}"></div>
                                 <ul class="topic-tree-list" id="topic-list-${main}-${sub}">
                                     ${topicTreeHTML}
                                 </ul>
@@ -330,11 +341,12 @@
                     <div class="cat-header" onclick="toggleTree('sub-list-${main}')">
                         <span class="cat-title" id="cat-title-${main}">📁 <b>${main}</b> <small style="color:#666; font-weight:normal;">(${subCats.length} sub-categories)</small></span>
                         <div class="cat-actions" id="cat-actions-${main}">
-                            <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); promptAddSubCategory('${main}')">+ Add Sub-Cat</button>
+                            <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); showInlineAddSub('${main}')">+ Add Sub-Cat</button>
                             <button class="btn btn-warning" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); enableInlineCatRename('${main}')">✏️ Rename</button>
                             <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); deleteCategory('${main}')">🗑️ Delete</button>
                         </div>
                     </div>
+                    <div id="inline-sub-input-container-${main}"></div>
                     <ul class="sub-tree-list" id="sub-list-${main}">
                         ${subTreeHTML}
                     </ul>
@@ -366,11 +378,23 @@
             renderCategoryUI();
         }
 
-        function promptAddSubCategory(main) {
-            const subNameRaw = prompt(`Add a new Sub-Category under '${main}' (e.g. bangla, english, ict):`);
-            if(!subNameRaw) return;
+        // --- INLINE ADD SUB-CATEGORY (NO POPUP) ---
+        function showInlineAddSub(main) {
+            toggleTree(`sub-list-${main}`);
+            const container = document.getElementById(`inline-sub-input-container-${main}`);
+            container.innerHTML = `
+                <div class="inline-add-box" onclick="event.stopPropagation()">
+                    <input type="text" id="add-sub-val-${main}" placeholder="Enter new sub-category name..." style="padding:6px; font-size:13px;" required>
+                    <button class="btn btn-success" style="padding:4px 12px; font-size:12px;" onclick="saveInlineAddSub('${main}')">💾 Save</button>
+                    <button class="btn btn-secondary" style="padding:4px 12px; font-size:12px;" onclick="document.getElementById('inline-sub-input-container-${main}').innerHTML=''">❌ Cancel</button>
+                </div>
+            `;
+            document.getElementById(`add-sub-val-${main}`).focus();
+        }
 
-            const subName = subNameRaw.trim().toLowerCase().replace(/\s+/g, '-');
+        function saveInlineAddSub(main) {
+            const input = document.getElementById(`add-sub-val-${main}`);
+            const subName = input.value.trim().toLowerCase().replace(/\s+/g, '-');
             if(!subName) return;
 
             if (!categoryData[main]) categoryData[main] = {};
@@ -381,11 +405,28 @@
             toggleTree(`sub-list-${main}`);
         }
 
-        function promptAddTopic(main, sub) {
-            const topicRaw = prompt(`Add a Topic under '${main} > ${sub}' (e.g. sondhi, grammar, algebra):`);
-            if(!topicRaw) return;
+        // --- INLINE ADD TOPIC (NO POPUP) ---
+        function showInlineAddTopic(main, sub) {
+            const subList = document.getElementById(`sub-list-${main}`);
+            if(subList) subList.classList.add('active');
+            
+            const topicList = document.getElementById(`topic-list-${main}-${sub}`);
+            if(topicList) topicList.classList.add('active');
 
-            const topic = topicRaw.trim().toLowerCase().replace(/\s+/g, '-');
+            const container = document.getElementById(`inline-topic-input-container-${main}-${sub}`);
+            container.innerHTML = `
+                <div class="inline-add-box" style="margin-left: 25px;" onclick="event.stopPropagation()">
+                    <input type="text" id="add-topic-val-${main}-${sub}" placeholder="Enter new topic name..." style="padding:6px; font-size:13px;" required>
+                    <button class="btn btn-success" style="padding:4px 12px; font-size:12px;" onclick="saveInlineAddTopic('${main}', '${sub}')">💾 Save</button>
+                    <button class="btn btn-secondary" style="padding:4px 12px; font-size:12px;" onclick="document.getElementById('inline-topic-input-container-${main}-${sub}').innerHTML=''">❌ Cancel</button>
+                </div>
+            `;
+            document.getElementById(`add-topic-val-${main}-${sub}`).focus();
+        }
+
+        function saveInlineAddTopic(main, sub) {
+            const input = document.getElementById(`add-topic-val-${main}-${sub}`);
+            const topic = input.value.trim().toLowerCase().replace(/\s+/g, '-');
             if(!topic) return;
 
             if (!categoryData[main][sub]) categoryData[main][sub] = [];
