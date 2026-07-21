@@ -5,59 +5,177 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Developing - Master Dashboard</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 25px; background-color: #f4f7f6; max-width: 850px; margin: 0 auto; }
-        .box { background: white; padding: 20px 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 25px; 
+            background-color: #f4f7f6; 
+            max-width: 1600px; 
+            margin: 0 auto; 
+        }
+        .box { 
+            background: white; 
+            padding: 25px 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+        }
         h2, h3 { color: #333; margin-top: 0; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         
-        .mcq-block { background: #f9f9f9; padding: 20px; border-radius: 6px; border-left: 5px solid #007bff; margin-bottom: 20px; position: relative; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 6px; color: #555; }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            font-size: 14px;
+        }
+
+        /* Category Manager Grid */
+        .cat-mgr-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 4 Options Grid (In 1 Line) */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Answer & Explanation Row */
+        .ans-explanation-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        .cat-select-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        /* MCQ Block Card */
+        .mcq-block { 
+            background: #ffffff; 
+            padding: 25px; 
+            border-radius: 8px; 
+            border: 1px solid #e2e8f0;
+            border-left: 6px solid #007bff; 
+            margin-bottom: 25px; 
+            position: relative; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
         .mcq-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #007bff; }
         
-        .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        /* Buttons */
+        .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-add { background-color: #007bff; color: white; margin-bottom: 20px; width: 100%; }
-        .btn-submit { background-color: #28a745; color: white; width: 100%; }
+        .btn-submit { background-color: #28a745; color: white; width: 100%; font-size: 16px; padding: 12px; }
         .btn-danger { background-color: #dc3545; color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
         
-        /* Category Management UI */
-        .cat-input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        /* Category Management UI & Buttons */
+        .cat-input-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+        }
+
+        .btn-cat-add {
+            white-space: nowrap; /* টেক্সট যেন না ভাঙে */
+            min-width: 170px;    /* বাটনের সর্বনিম্ন উইথ বাড়ানো হয়েছে */
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-cat-add:hover {
+            background-color: #0056b3;
+        }
+
         .cat-list { list-style: none; padding: 0; margin: 0; }
-        .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 4px; margin-bottom: 8px; border: 1px solid #e9ecef; }
+        .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #e9ecef; }
+        
+        @media (max-width: 900px) {
+            .options-grid { grid-template-columns: 1fr 1fr; }
+            .ans-explanation-row, .cat-mgr-grid, .cat-select-row { grid-template-columns: 1fr; }
+            .cat-input-group { flex-direction: column; }
+            .btn-cat-add { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- ১. Page / Category Manager Section -->
+    <!-- ১. Category & Sub-Category Manager Section -->
     <div class="box">
-        <h3>📂 Manage Pages / Categories</h3>
-        <p style="color: #666; font-size: 14px;">Create, edit name, or delete quiz pages dynamically.</p>
+        <h3>📂 Manage Categories & Sub-Categories</h3>
+        <p style="color: #666; font-size: 14px;">Create and manage topics and sub-topics dynamically.</p>
         
-        <div class="cat-input-group">
-            <input type="text" id="newPageName" placeholder="Enter page name (e.g. page-1, page-2, science-1)">
-            <button type="button" class="btn btn-add" style="width: auto; margin:0;" onclick="createPage()">+ Create Page</button>
-        </div>
+        <div class="cat-mgr-grid">
+            <!-- Category Management -->
+            <div>
+                <label>Main Categories:</label>
+                <div class="cat-input-group">
+                    <input type="text" id="newCatName" placeholder="e.g. bangla, english, math">
+                    <button type="button" class="btn-cat-add" onclick="createCategory()">+ Add Category</button>
+                </div>
+                <ul class="cat-list" id="categoryList">
+                    <li>Loading Categories...</li>
+                </ul>
+            </div>
 
-        <label>Available Pages in Database:</label>
-        <ul class="cat-list" id="categoryList">
-            <li>Loading pages...</li>
-        </ul>
+            <!-- Sub-Category Management -->
+            <div>
+                <label>Sub-Categories:</label>
+                <div class="form-group">
+                    <select id="parentCatSelect">
+                        <option value="">-- Select Parent Category --</option>
+                    </select>
+                </div>
+                <div class="cat-input-group">
+                    <input type="text" id="newSubCatName" placeholder="e.g. sondhi, grammar, algebra">
+                    <button type="button" class="btn-cat-add" onclick="createSubCategory()">+ Add Sub-Category</button>
+                </div>
+                <ul class="cat-list" id="subCategoryList">
+                    <li style="color:#888;">Select a parent category to view sub-categories.</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <!-- ২. MCQ Builder Section -->
     <div class="box">
         <h2>📝 Dynamic Quiz Builder</h2>
-        <p style="text-align: center; color: #666;">Select target page, add questions, and click submit.</p>
+        <p style="text-align: center; color: #666;">Select target Category & Sub-Category, add questions, and click submit.</p>
         
-        <div class="form-group">
-            <label>Select Target Page:</label>
-            <select id="mainCategory" required>
-                <!-- Categories will be dynamically loaded here -->
-            </select>
+        <div class="cat-select-row">
+            <div class="form-group">
+                <label>Select Category:</label>
+                <select id="mainCategory" onchange="updateSubCatDropdown()" required>
+                    <!-- Categories will load dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Select Sub-Category:</label>
+                <select id="mainSubCategory" required>
+                    <option value="">-- Select Sub-Category --</option>
+                </select>
+            </div>
         </div>
         
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 
         <form id="masterQuizForm">
             <div id="mcqContainer"></div>
@@ -71,99 +189,169 @@
         const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
         const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
 
+        let categoryData = {};
+
         // --- Category Management Logics ---
         async function loadCategories() {
-            const catSelect = document.getElementById('mainCategory');
-            const catList = document.getElementById('categoryList');
-            
             try {
                 const res = await fetch(CAT_API_URL);
-                const categories = await res.json();
+                const rawCategories = await res.json();
 
-                catSelect.innerHTML = "";
-                catList.innerHTML = "";
+                categoryData = {};
 
-                if (categories.length === 0) {
-                    catSelect.innerHTML = `<option value="">No pages available. Create one above!</option>`;
-                    catList.innerHTML = `<li style="color:#888;">No active pages found in database.</li>`;
-                    return;
-                }
-
-                categories.forEach(cat => {
-                    // Select Dropdown Populating
-                    const option = document.createElement('option');
-                    option.value = cat;
-                    option.innerText = cat;
-                    catSelect.appendChild(option);
-
-                    // List Displaying
-                    const li = document.createElement('li');
-                    li.className = 'cat-item';
-                    li.innerHTML = `
-                        <span><strong>${cat}</strong></span>
-                        <div>
-                            <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deletePage('${cat}')">Delete Page</button>
-                        </div>
-                    `;
-                    catList.appendChild(li);
+                rawCategories.forEach(item => {
+                    if (item.includes('/')) {
+                        const [cat, sub] = item.split('/');
+                        if (!categoryData[cat]) categoryData[cat] = [];
+                        if (sub && !categoryData[cat].includes(sub)) categoryData[cat].push(sub);
+                    } else {
+                        if (!categoryData[item]) categoryData[item] = [];
+                    }
                 });
 
+                renderCategoryUI();
             } catch (err) {
                 console.error("Failed to load categories", err);
             }
         }
 
-        function createPage() {
-            const pageInput = document.getElementById('newPageName');
-            const pageName = pageInput.value.trim().toLowerCase().replace(/\s+/g, '-');
-            
-            if(!pageName) {
-                alert("Please enter a valid page name!");
+        function renderCategoryUI() {
+            const catList = document.getElementById('categoryList');
+            const catSelect = document.getElementById('mainCategory');
+            const parentCatSelect = document.getElementById('parentCatSelect');
+
+            catList.innerHTML = "";
+            catSelect.innerHTML = "";
+            parentCatSelect.innerHTML = '<option value="">-- Select Parent Category --</option>';
+
+            const categories = Object.keys(categoryData);
+
+            if (categories.length === 0) {
+                catList.innerHTML = `<li style="color:#888;">No active categories found.</li>`;
+                catSelect.innerHTML = `<option value="">No Categories Available</option>`;
                 return;
             }
 
-            const catSelect = document.getElementById('mainCategory');
-            
-            // Check if already exists in select dropdown
-            let exists = false;
-            for (let opt of catSelect.options) {
-                if (opt.value === pageName) exists = true;
-            }
-
-            if (!exists) {
-                const newOption = new Option(pageName, pageName, true, true);
-                catSelect.add(newOption);
-                
-                // Add dummy item entry indicator
-                const catList = document.getElementById('categoryList');
+            categories.forEach(cat => {
                 const li = document.createElement('li');
                 li.className = 'cat-item';
-                li.innerHTML = `<span><strong>${pageName}</strong> (New - Ready for questions)</span>`;
+                li.innerHTML = `
+                    <span><strong>${cat}</strong></span>
+                    <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteCategory('${cat}')">Delete</button>
+                `;
                 catList.appendChild(li);
 
-                pageInput.value = "";
-                alert(`Page '${pageName}' created! Now you can add questions under this page below.`);
+                catSelect.add(new Option(cat, cat));
+                parentCatSelect.add(new Option(cat, cat));
+            });
+
+            updateSubCatDropdown();
+            renderSubCatList();
+        }
+
+        function createCategory() {
+            const input = document.getElementById('newCatName');
+            const catName = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+            
+            if (!catName) { alert("Please enter a category name!"); return; }
+            if (categoryData[catName]) { alert("Category already exists!"); return; }
+
+            categoryData[catName] = [];
+            input.value = "";
+            renderCategoryUI();
+        }
+
+        function createSubCategory() {
+            const parent = document.getElementById('parentCatSelect').value;
+            const input = document.getElementById('newSubCatName');
+            const subName = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+
+            if (!parent) { alert("Please select a parent category first!"); return; }
+            if (!subName) { alert("Please enter a sub-category name!"); return; }
+            
+            if (!categoryData[parent]) categoryData[parent] = [];
+            if (categoryData[parent].includes(subName)) { alert("Sub-category already exists!"); return; }
+
+            categoryData[parent].push(subName);
+            input.value = "";
+            renderCategoryUI();
+            document.getElementById('parentCatSelect').value = parent;
+            renderSubCatList();
+        }
+
+        function renderSubCatList() {
+            const parent = document.getElementById('parentCatSelect').value;
+            const subCatList = document.getElementById('subCategoryList');
+            subCatList.innerHTML = "";
+
+            if (!parent || !categoryData[parent] || categoryData[parent].length === 0) {
+                subCatList.innerHTML = `<li style="color:#888;">No sub-categories found for this topic.</li>`;
+                return;
+            }
+
+            categoryData[parent].forEach(sub => {
+                const li = document.createElement('li');
+                li.className = 'cat-item';
+                li.innerHTML = `
+                    <span>${sub}</span>
+                    <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteSubCategory('${parent}', '${sub}')">Delete</button>
+                `;
+                subCatList.appendChild(li);
+            });
+        }
+
+        document.getElementById('parentCatSelect').addEventListener('change', renderSubCatList);
+
+        function updateSubCatDropdown() {
+            const selectedCat = document.getElementById('mainCategory').value;
+            const subSelect = document.getElementById('mainSubCategory');
+            subSelect.innerHTML = "";
+
+            if (selectedCat && categoryData[selectedCat] && categoryData[selectedCat].length > 0) {
+                categoryData[selectedCat].forEach(sub => {
+                    subSelect.add(new Option(sub, sub));
+                });
             } else {
-                alert("This page name already exists!");
+                subSelect.innerHTML = `<option value="">No sub-categories available</option>`;
             }
         }
 
-        async function deletePage(pageName) {
-            if(!confirm(`Are you sure you want to delete page '${pageName}' and all its questions?`)) return;
+        async function deleteCategory(catName) {
+            if(!confirm(`Delete category '${catName}' and all its questions?`)) return;
 
             try {
-                // Fetch all questions under this category to delete
-                const res = await fetch(`${API_URL}?category=${encodeURIComponent(pageName)}`);
+                const res = await fetch(`${API_URL}`);
                 const questions = await res.json();
+                
+                for (let q of questions) {
+                    if (q.category === catName || q.category.startsWith(`${catName}/`)) {
+                        await fetch(`${API_URL}/${q._id}`, { method: 'DELETE' });
+                    }
+                }
+                delete categoryData[catName];
+                renderCategoryUI();
+                alert(`Category '${catName}' deleted!`);
+            } catch (err) {
+                alert("Error deleting category!");
+            }
+        }
 
+        async function deleteSubCategory(catName, subName) {
+            if(!confirm(`Delete sub-category '${subName}'?`)) return;
+
+            const fullCatPath = `${catName}/${subName}`;
+            try {
+                const res = await fetch(`${API_URL}?category=${encodeURIComponent(fullCatPath)}`);
+                const questions = await res.json();
                 for (let q of questions) {
                     await fetch(`${API_URL}/${q._id}`, { method: 'DELETE' });
                 }
 
-                alert(`Page '${pageName}' and its questions deleted successfully!`);
-                loadCategories();
+                categoryData[catName] = categoryData[catName].filter(s => s !== subName);
+                renderCategoryUI();
+                alert(`Sub-category '${subName}' deleted!`);
             } catch (err) {
-                alert("Error deleting page!");
+                alert("Error deleting sub-category!");
             }
         }
 
@@ -177,26 +365,36 @@
             
             mcqBlock.innerHTML = `
                 <div class="mcq-title">MCQ #${mcqCount}</div>
-                ${mcqCount > 1 ? `<button type="button" class="btn btn-danger" style="position:absolute; top:15px; right:15px; padding:4px 8px; font-size:12px;" onclick="removeMCQField(${mcqCount})">Remove</button>` : ''}
+                ${mcqCount > 1 ? `<button type="button" class="btn btn-danger" style="position:absolute; top:15px; right:15px; padding:4px 10px; font-size:12px;" onclick="removeMCQField(${mcqCount})">Remove</button>` : ''}
                 
                 <div class="form-group">
                     <label>Question:</label>
-                    <input type="text" class="q-input" placeholder="e.g. What is the capital of France?" required>
+                    <input type="text" class="q-input" placeholder="Enter question..." required>
                 </div>
                 
-                <div class="form-group"><input type="text" class="opt-0" placeholder="Option 1 (Index 0)" required></div>
-                <div class="form-group"><input type="text" class="opt-1" placeholder="Option 2 (Index 1)" required></div>
-                <div class="form-group"><input type="text" class="opt-2" placeholder="Option 3 (Index 2)" required></div>
-                <div class="form-group"><input type="text" class="opt-3" placeholder="Option 4 (Index 3)" required></div>
+                <label>Options (4 Choices):</label>
+                <div class="options-grid">
+                    <input type="text" class="opt-0" placeholder="Option 1 (Index 0)" required>
+                    <input type="text" class="opt-1" placeholder="Option 2 (Index 1)" required>
+                    <input type="text" class="opt-2" placeholder="Option 3 (Index 2)" required>
+                    <input type="text" class="opt-3" placeholder="Option 4 (Index 3)" required>
+                </div>
                 
-                <div class="form-group">
-                    <label>Correct Answer Index:</label>
-                    <select class="ans-input" required>
-                        <option value="0">Option 1 (Index 0)</option>
-                        <option value="1">Option 2 (Index 1)</option>
-                        <option value="2">Option 3 (Index 2)</option>
-                        <option value="3">Option 4 (Index 3)</option>
-                    </select>
+                <div class="ans-explanation-row">
+                    <div class="form-group">
+                        <label>Correct Answer Index:</label>
+                        <select class="ans-input" required>
+                            <option value="0">Option 1 (Index 0)</option>
+                            <option value="1">Option 2 (Index 1)</option>
+                            <option value="2">Option 3 (Index 2)</option>
+                            <option value="3">Option 4 (Index 3)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Explanation (ব্যাখ্যা):</label>
+                        <input type="text" class="exp-input" placeholder="Enter answer explanation (optional)...">
+                    </div>
                 </div>
             `;
             container.appendChild(mcqBlock);
@@ -210,13 +408,12 @@
         // --- Submit Logics ---
         document.getElementById('masterQuizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const category = document.getElementById('mainCategory').value;
+            const mainCat = document.getElementById('mainCategory').value;
+            const subCat = document.getElementById('mainSubCategory').value;
             
-            if(!category) {
-                alert("Please select or create a page first!");
-                return;
-            }
+            if(!mainCat) { alert("Please select a Category!"); return; }
 
+            const targetCategoryPath = subCat ? `${mainCat}/${subCat}` : mainCat;
             const mcqBlocks = document.querySelectorAll('.mcq-block');
             let successCount = 0;
             let hasError = false;
@@ -235,7 +432,8 @@
                         block.querySelector('.opt-3').value
                     ],
                     ans: parseInt(block.querySelector('.ans-input').value),
-                    category: category
+                    explanation: block.querySelector('.exp-input').value || "",
+                    category: targetCategoryPath
                 };
 
                 try {
@@ -256,11 +454,11 @@
             submitBtn.disabled = false;
 
             if (!hasError) {
-                alert(`Success! ${successCount} questions saved under '${category}'.`);
+                alert(`Success! ${successCount} questions saved under '${targetCategoryPath}'.`);
                 document.getElementById('mcqContainer').innerHTML = "";
                 mcqCount = 0;
                 addMCQField();
-                loadCategories(); // Reload category list
+                loadCategories();
             } else {
                 alert(`Added ${successCount} questions, but encountered issues with some.`);
             }
