@@ -78,6 +78,7 @@
         .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-add { background-color: #007bff; color: white; margin-bottom: 20px; width: 100%; }
         .btn-submit { background-color: #28a745; color: white; width: 100%; font-size: 16px; padding: 12px; }
+        .btn-csv { background-color: #17a2b8; color: white; width: 100%; font-size: 15px; padding: 11px; margin-top: 10px; }
         .btn-danger { background-color: #dc3545; color: white; }
         
         /* Category Management UI & Buttons */
@@ -88,8 +89,8 @@
         }
 
         .btn-cat-add {
-            white-space: nowrap; /* টেক্সট যেন না ভাঙে */
-            min-width: 170px;    /* বাটনের সর্বনিম্ন উইথ বাড়ানো হয়েছে */
+            white-space: nowrap; 
+            min-width: 170px;    
             padding: 10px 20px;
             background-color: #007bff;
             color: white;
@@ -101,10 +102,7 @@
             transition: background-color 0.2s ease;
         }
 
-        .btn-cat-add:hover {
-            background-color: #0056b3;
-        }
-
+        .btn-cat-add:hover { background-color: #0056b3; }
         .cat-list { list-style: none; padding: 0; margin: 0; }
         .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #e9ecef; }
         
@@ -155,11 +153,9 @@
         </div>
     </div>
 
-    <!-- ২. MCQ Builder Section -->
+    <!-- ২. Target Selection (Common for Both Uploads) -->
     <div class="box">
-        <h2>📝 Dynamic Quiz Builder</h2>
-        <p style="text-align: center; color: #666;">Select target Category & Sub-Category, add questions, and click submit.</p>
-        
+        <h2>🎯 Select Target Topic</h2>
         <div class="cat-select-row">
             <div class="form-group">
                 <label>Select Category:</label>
@@ -174,9 +170,27 @@
                 </select>
             </div>
         </div>
-        
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+    </div>
 
+    <!-- ৩. CSV Bulk Upload Section -->
+    <div class="box" style="border-left: 6px solid #17a2b8;">
+        <h3>📤 Bulk Upload Questions via CSV / Excel</h3>
+        <p style="color: #666; font-size: 14px;">Select category above, choose your .csv file, and click upload.</p>
+        
+        <form id="csvUploadForm">
+            <div class="form-group">
+                <label>Select CSV File:</label>
+                <input type="file" id="csvFileInput" accept=".csv" required>
+            </div>
+            <button type="submit" class="btn btn-csv">📁 Upload CSV File</button>
+        </form>
+    </div>
+
+    <!-- ৪. Manual MCQ Builder Section -->
+    <div class="box">
+        <h2>📝 Manual Quiz Builder</h2>
+        <p style="text-align: center; color: #666;">Add questions one by one manually if needed.</p>
+        
         <form id="masterQuizForm">
             <div id="mcqContainer"></div>
             <button type="button" class="btn btn-add" onclick="addMCQField()">➕ Add More MCQ</button>
@@ -354,6 +368,48 @@
                 alert("Error deleting sub-category!");
             }
         }
+
+        // --- CSV Upload Logic ---
+        document.getElementById('csvUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mainCat = document.getElementById('mainCategory').value;
+            const subCat = document.getElementById('mainSubCategory').value;
+            const fileInput = document.getElementById('csvFileInput');
+
+            if (!mainCat) { alert("Please select a Category!"); return; }
+            if (!fileInput.files[0]) { alert("Please choose a CSV file first!"); return; }
+
+            const targetCategoryPath = subCat ? `${mainCat}/${subCat}` : mainCat;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('category', targetCategoryPath);
+
+            const uploadBtn = e.target.querySelector('button');
+            uploadBtn.innerText = "Uploading CSV... Please wait...";
+            uploadBtn.disabled = true;
+
+            try {
+                const res = await fetch('https://mosabber-quiz-app.onrender.com/api/questions/upload-csv', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    alert(`🎉 Success! ${result.count} questions added to '${targetCategoryPath}'.`);
+                    fileInput.value = "";
+                    loadCategories();
+                } else {
+                    alert(`❌ Error: ${result.message || result.error}`);
+                }
+            } catch (err) {
+                alert("❌ Failed to upload CSV file!");
+            } finally {
+                uploadBtn.innerText = "📁 Upload CSV File";
+                uploadBtn.disabled = false;
+            }
+        });
 
         // --- MCQ Fields Logics ---
         function addMCQField() {
