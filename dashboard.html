@@ -112,7 +112,7 @@
             cursor: pointer;
         }
 
-        /* Level 3 Topics (Sub-Sub Category) */
+        /* Level 3 Topics */
         .topic-tree-list {
             list-style: none;
             padding-left: 25px;
@@ -150,7 +150,14 @@
             border: 1px solid #007bff;
             border-radius: 4px;
             width: auto;
-            max-width: 250px;
+            max-width: 200px;
+        }
+
+        .topic-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
         .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ffc107; }
@@ -163,6 +170,7 @@
             .cat-input-group { flex-direction: column; }
             .btn-cat-add { width: 100%; }
             .inline-add-box { flex-direction: column; }
+            .topic-header-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
     </style>
 </head>
@@ -207,10 +215,15 @@
         </div>
     </div>
 
-    <!-- ৩. Existing Questions List -->
+    <!-- ৩. Existing Questions List with Dynamic Delete Button Text -->
     <div class="box" style="border-left: 6px solid #ffc107;">
-        <h2>✏️ Manage Existing Questions (Edit / Delete)</h2>
-        <p style="color: #666; font-size: 14px;">Selected Topic: <b id="selectedTopicLabel">None</b></p>
+        <div class="topic-header-bar">
+            <div>
+                <h2 style="margin:0;">✏️ Manage Existing Questions (Edit / Delete)</h2>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">Selected Topic: <b id="selectedTopicLabel">None</b></p>
+            </div>
+            <button id="deleteAllTopicQuestionsBtn" class="btn btn-danger" style="display:none;" onclick="deleteAllQuestionsInTopic()"></button>
+        </div>
         <div id="existingQuestionsContainer">
             <p style="color:#888;">Select a category above to view and edit questions.</p>
         </div>
@@ -378,7 +391,6 @@
             renderCategoryUI();
         }
 
-        // --- INLINE ADD SUB-CATEGORY (NO POPUP) ---
         function showInlineAddSub(main) {
             toggleTree(`sub-list-${main}`);
             const container = document.getElementById(`inline-sub-input-container-${main}`);
@@ -405,7 +417,6 @@
             toggleTree(`sub-list-${main}`);
         }
 
-        // --- INLINE ADD TOPIC (NO POPUP) ---
         function showInlineAddTopic(main, sub) {
             const subList = document.getElementById(`sub-list-${main}`);
             if(subList) subList.classList.add('active');
@@ -438,7 +449,6 @@
             toggleTree(`topic-list-${main}-${sub}`);
         }
 
-        // --- INLINE RENAMES ---
         function enableInlineCatRename(main) {
             const titleElement = document.getElementById(`cat-title-${main}`);
             const actionsElement = document.getElementById(`cat-actions-${main}`);
@@ -589,9 +599,11 @@
             const targetCategoryPath = getSelectedCategoryPath();
             const container = document.getElementById('existingQuestionsContainer');
             const label = document.getElementById('selectedTopicLabel');
+            const deleteAllBtn = document.getElementById('deleteAllTopicQuestionsBtn');
 
             if(!targetCategoryPath) {
                 container.innerHTML = "<p style='color:#888;'>No category selected.</p>";
+                deleteAllBtn.style.display = "none";
                 return;
             }
 
@@ -605,6 +617,7 @@
                 renderExistingQuestions();
             } catch (err) {
                 container.innerHTML = "<p style='color:red;'>Failed to load questions.</p>";
+                deleteAllBtn.style.display = "none";
             }
         }
 
@@ -615,11 +628,18 @@
 
         function renderExistingQuestions() {
             const container = document.getElementById('existingQuestionsContainer');
+            const deleteAllBtn = document.getElementById('deleteAllTopicQuestionsBtn');
+            const targetCategoryPath = getSelectedCategoryPath();
+
             if(loadedQuestions.length === 0) {
                 container.innerHTML = "<p style='color:#888;'>No questions found under this topic.</p>";
+                deleteAllBtn.style.display = "none";
                 return;
             }
 
+            deleteAllBtn.innerText = `🗑️ Delete All Questions in ${targetCategoryPath}`;
+            deleteAllBtn.style.display = "inline-block";
+            
             container.innerHTML = "";
             loadedQuestions.forEach((q, index) => {
                 const card = document.createElement('div');
@@ -639,6 +659,40 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        // --- BULK DELETE ALL QUESTIONS IN SELECTED TOPIC ---
+        async function deleteAllQuestionsInTopic() {
+            const targetCategoryPath = getSelectedCategoryPath();
+            if(!targetCategoryPath || loadedQuestions.length === 0) return;
+
+            if(!confirm(`⚠️ WARNING: Are you sure you want to delete ALL (${loadedQuestions.length}) questions under '${targetCategoryPath}'? This action cannot be undone.`)) {
+                return;
+            }
+
+            const btn = document.getElementById('deleteAllTopicQuestionsBtn');
+            btn.innerText = "Deleting All...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}?category=${encodeURIComponent(targetCategoryPath)}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await res.json();
+                
+                if(res.ok && result.success) {
+                    alert(`✅ All questions under '${targetCategoryPath}' deleted successfully!`);
+                    loadExistingQuestions();
+                } else {
+                    alert(`❌ Failed: ${result.message || result.error || 'Could not delete questions'}`);
+                }
+            } catch (err) {
+                console.error("Delete Error:", err);
+                alert("❌ Error connecting to server! Check backend console logs.");
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         function enableInlineEdit(id, index) {

@@ -4,43 +4,37 @@ const cors = require('cors');
 const multer = require('multer');
 const csv = require('csv-parser');
 const fs = require('fs');
-const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const upload = multer({ dest: 'uploads/' });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Uploads directory setup
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-const upload = multer({ dest: 'uploads/' });
-
 // MongoDB Connection
-const MONGO_URI = process.env.MONGO_URI || "YOUR_MONGODB_ATLAS_CONNECTION_STRING";
+const MONGO_URI = process.env.MONGO_URI || 'YOUR_MONGODB_CONNECTION_STRING_HERE';
+mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB Connected Successfully'))
+.catch(err => console.error('MongoDB Connection Error:', err));
 
-mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅ Connected to MongoDB Atlas'))
-    .catch((err) => console.error('❌ MongoDB Connection Error:', err));
-
-// Schema & Model
-const QuestionSchema = new mongoose.Schema({
+// MCQ Question Schema & Model
+const questionSchema = new mongoose.Schema({
     q: { type: String, required: true },
-    options: [{ type: String, required: true }],
+    options: { type: [String], required: true },
     ans: { type: Number, required: true },
     explanation: { type: String, default: "" },
-    category: { type: String, required: true }
+    category: { type: String, required: true } // Stores format: "main/sub/topic"
 }, { timestamps: true });
 
-const Question = mongoose.model('Question', QuestionSchema);
+const Question = mongoose.model('Question', questionSchema);
 
-// --- API ENDPOINTS ---
+// --- API ROUTES ---
 
-// 1. Get Questions (Optionally filter by category)
+// 1. GET ALL QUESTIONS (FILTERED BY CATEGORY)
 app.get('/api/questions', async (req, res) => {
     try {
         const { category } = req.query;
@@ -48,126 +42,133 @@ app.get('/api/questions', async (req, res) => {
         if (category) {
             query.category = category;
         }
-        const questions = await Question.find(query).sort({ createdAt: -1 });
-        res.json(questions);
+        const questions = await Question.find(query);
+        res.status(200).json(questions);
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 2. Get All Unique Categories
+// 2. GET ALL UNIQUE CATEGORY PATHS
 app.get('/api/categories', async (req, res) => {
     try {
         const categories = await Question.distinct('category');
-        res.json(categories);
+        res.status(200).json(categories);
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 3. Post Single Question
+// 3. POST A SINGLE MCQ QUESTION
 app.post('/api/questions', async (req, res) => {
     try {
         const { q, options, ans, explanation, category } = req.body;
         const newQuestion = new Question({ q, options, ans, explanation, category });
         await newQuestion.save();
-        res.json({ success: true, data: newQuestion });
+        res.status(201).json({ success: true, data: newQuestion });
     } catch (err) {
-        res.status(400).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 4. Update/Edit Question by ID
+// 4. PUT / UPDATE A SINGLE MCQ QUESTION BY ID
 app.put('/api/questions/:id', async (req, res) => {
     try {
-        const { q, options, ans, explanation, category } = req.body;
-        const updatedQuestion = await Question.findByIdAndUpdate(
-            req.params.id,
-            { q, options, ans, explanation, category },
-            { new: true }
-        );
-        res.json({ success: true, data: updatedQuestion });
+        const { id } = req.params;
+        const updatedQuestion = await Question.findByIdAndUpdate(id, req.body, { new: true });
+        res.status(200).json({ success: true, data: updatedQuestion });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 5. Delete Single Question by ID
+// 5. DELETE ALL QUESTIONS IN A SPECIFIC TOPIC/CATEGORY (BULK DELETE)
+app.delete('/api/questions', async (req, res) => {
+    try {
+        const { category } = req.query;
+        if (!category) {
+            return res.status(400).json({ success: false, message: "Category query parameter is required" });
+        }
+
+        const result = await Question.deleteMany({ category: category });
+        res.status(200).json({ 
+            success: true, 
+            message: `Deleted ${result.deletedCount} questions under ${category}`,
+            deletedCount: result.deletedCount 
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 6. DELETE A SINGLE QUESTION BY ID
 app.delete('/api/questions/:id', async (req, res) => {
     try {
-        await Question.findByIdAndDelete(req.params.id);
-        res.json({ success: true, message: "Question deleted successfully." });
+        const { id } = req.params;
+        await Question.findByIdAndDelete(id);
+        res.status(200).json({ success: true, message: "Question deleted successfully" });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 6. Delete Entire Category or Sub-Category in One Query
+// 7. DELETE AN ENTIRE CATEGORY OR SUBCATEGORY (PREFIX DELETE)
 app.delete('/api/categories', async (req, res) => {
     try {
         const { category } = req.query;
-        if (!category) return res.status(400).json({ success: false, message: "Category query required" });
-
-        // Regex match for category or category/subCategory
-        const regex = new RegExp(`^${category}(/|$)`, 'i');
-        const result = await Question.deleteMany({ category: { $regex: regex } });
-
-        res.json({ success: true, message: `Deleted ${result.deletedCount} questions under '${category}'` });
+        if (!category) {
+            return res.status(400).json({ success: false, message: "Category parameter is required" });
+        }
+        
+        // RegEx to delete exact category path or sub-paths (e.g. prili or prili/bangla)
+        const regex = new RegExp(`^${category}(/|$)`);
+        const result = await Question.deleteMany({ category: regex });
+        
+        res.status(200).json({ success: true, deletedCount: result.deletedCount });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 7. CSV File Upload
+// 8. POST CSV FILE BULK UPLOAD
 app.post('/api/questions/upload-csv', upload.single('file'), (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false, message: "No CSV file uploaded!" });
-
     const category = req.body.category;
-    if (!category) {
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        return res.status(400).json({ success: false, message: "Category path is required!" });
+    if (!req.file || !category) {
+        return res.status(400).json({ success: false, message: "File and category are required." });
     }
 
     const results = [];
-
     fs.createReadStream(req.file.path)
         .pipe(csv())
         .on('data', (data) => {
-            if (data.question && data.opt0 && data.opt1) {
-                results.push({
-                    q: data.question.trim(),
-                    options: [
-                        data.opt0 ? data.opt0.trim() : "",
-                        data.opt1 ? data.opt1.trim() : "",
-                        data.opt2 ? data.opt2.trim() : "",
-                        data.opt3 ? data.opt3.trim() : ""
-                    ],
-                    ans: parseInt(data.ans) || 0,
-                    explanation: data.explanation ? data.explanation.trim() : "",
-                    category: category
-                });
-            }
+            // Expected CSV format: Question,OptionA,OptionB,OptionC,OptionD,AnswerIndex,Explanation
+            results.push({
+                q: data.Question || data.q,
+                options: [
+                    data.OptionA || data.opt1,
+                    data.OptionB || data.opt2,
+                    data.OptionC || data.opt3,
+                    data.OptionD || data.opt4
+                ],
+                ans: parseInt(data.AnswerIndex || data.ans || 0),
+                explanation: data.Explanation || data.explanation || "",
+                category: category
+            });
         })
         .on('end', async () => {
             try {
-                if (results.length === 0) {
-                    if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-                    return res.status(400).json({ success: false, message: "CSV file was empty or improperly formatted." });
-                }
-
                 await Question.insertMany(results);
-                if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-
-                res.json({ success: true, message: `Successfully added ${results.length} questions!`, count: results.length });
+                fs.unlinkSync(req.file.path); // Delete local temp file
+                res.status(200).json({ success: true, count: results.length });
             } catch (err) {
                 if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
                 res.status(500).json({ success: false, error: err.message });
             }
-        })
-        .on('error', (err) => {
-            if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-            res.status(500).json({ success: false, error: err.message });
         });
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// Server Start
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
