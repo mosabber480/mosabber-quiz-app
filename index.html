@@ -1,28 +1,74 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বাংলা ব্যাকরণ কুইজ অ্যাপ</title>
+    <title>Custom Developing - Home</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
-        h1 { color: #333; }
-        .quiz-menu { margin-top: 30px; }
-        .quiz-link { display: inline-block; margin: 10px; padding: 15px 25px; background-color: #2ecc71; color: white; text-decoration: none; border-radius: 5px; font-size: 18px; }
-        .quiz-link:hover { background-color: #2ecc71; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 40px 20px; 
+            background-color: #f4f7f6; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card { 
+            background: white; 
+            padding: 35px 30px; 
+            border-radius: 12px; 
+            max-width: 450px; 
+            width: 100%;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+            text-align: center;
+        }
+        h1 { 
+            color: #333; 
+            font-size: 26px; 
+            margin-bottom: 8px; 
+        }
+        p { 
+            color: #666; 
+            font-size: 14px; 
+            margin-bottom: 25px; 
+        }
+        .btn-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        a { 
+            display: block; 
+            padding: 14px; 
+            background: #007bff; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            font-size: 15px;
+            transition: background 0.3s ease;
+        }
+        a:hover { background: #0056b3; }
+        a.btn-dashboard { 
+            background: #28a745; 
+        }
+        a.btn-dashboard:hover { 
+            background: #218838; 
+        }
     </style>
 </head>
 <body>
 
-    <h1>স্বাগতম বাংলা ব্যাকরণ কুইজে!</h1>
-    <p>নিচের যেকোনো একটি বিষয় সিলেক্ট করে কুইজ শুরু করুন:</p>
-
-    <div class="quiz-menu">
-        <!-- আপনার তৈরি করা ৫ নম্বর পেজের লিংক -->
-        <a class="quiz-link" href="5.সন্ধি-বিচ্ছেদ.html">৫. সন্ধি-বিচ্ছেদ কুইজ</a>
+    <div class="card">
+        <h1>Custom Developing</h1>
+        <p>Welcome to the Quiz Practice & Management Portal</p>
         
-        <!-- ভবিষ্যতে অন্য পেজ বানালে সেগুলোও এখানে এভাবে যোগ করবেন -->
-        <!-- <a class="quiz-link" href="1.ভাষা.html">১. ভাষা</a> -->
+        <div class="btn-group">
+            <a href="page-1.html">📖 Start Page 1 Quiz</a>
+            <a href="dashboard.html" class="btn-dashboard">⚙️ Admin Dashboard</a>
+        </div>
     </div>
 
 </body>
