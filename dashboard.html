@@ -37,6 +37,7 @@
         .ans-explanation-row { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 10px; }
         .cat-select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
+        /* MCQ Block / Card Style */
         .mcq-block { 
             background: #ffffff; 
             padding: 25px; 
@@ -55,15 +56,15 @@
         .btn-csv { background-color: #17a2b8; color: white; width: 100%; font-size: 15px; padding: 11px; margin-top: 10px; }
         .btn-danger { background-color: #dc3545; color: white; }
         .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-secondary { background-color: #6c757d; color: white; }
         
         .cat-input-group { display: flex; gap: 10px; margin-bottom: 15px; }
         .btn-cat-add { white-space: nowrap; min-width: 170px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
         .cat-list { list-style: none; padding: 0; margin: 0; }
         .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #e9ecef; }
         
-        /* Questions Table / List UI */
-        .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 12px; }
-        .q-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ffc107; }
+        .q-actions { display: flex; gap: 10px; margin-top: 15px; }
 
         @media (max-width: 900px) {
             .options-grid { grid-template-columns: 1fr 1fr; }
@@ -150,7 +151,7 @@
         </form>
     </div>
 
-    <!-- ৫. Existing Questions List (Edit & Delete Management) -->
+    <!-- ৫. Existing Questions List (In-line Edit & Delete) -->
     <div class="box" style="border-left: 6px solid #ffc107;">
         <h2>✏️ Manage Existing Questions (Edit / Delete)</h2>
         <p style="color: #666; font-size: 14px;">Selected Topic: <b id="selectedTopicLabel">None</b></p>
@@ -165,6 +166,7 @@
         const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
 
         let categoryData = {};
+        let loadedQuestions = [];
 
         async function loadCategories() {
             try {
@@ -294,11 +296,9 @@
         async function deleteCategory(catName) {
             if(!confirm(`Are you sure you want to delete category '${catName}'?`)) return;
 
-            // ১. UI থেকে সাথে সাথে মুছে ফেলুন
             delete categoryData[catName];
             renderCategoryUI();
 
-            // ২. ব্যাকগ্রাউন্ডে ডাটাবেস এপিআই কল করুন
             try {
                 await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(catName)}`, { 
                     method: 'DELETE' 
@@ -313,13 +313,11 @@
 
             const fullCatPath = `${catName}/${subName}`;
 
-            // ১. UI থেকে সাথে সাথে মুছে ফেলুন
             if(categoryData[catName]) {
                 categoryData[catName] = categoryData[catName].filter(s => s !== subName);
             }
             renderCategoryUI();
 
-            // ২. ব্যাকগ্রাউন্ডে এপিআই কল
             try {
                 await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(fullCatPath)}`, { 
                     method: 'DELETE' 
@@ -329,7 +327,7 @@
             }
         }
 
-        // --- Existing Questions Loader & Editor ---
+        // --- Existing Questions Loader ---
         async function loadExistingQuestions() {
             const mainCat = document.getElementById('mainCategory').value;
             const subCat = document.getElementById('mainSubCategory').value;
@@ -347,30 +345,130 @@
 
             try {
                 const res = await fetch(`${API_URL}?category=${encodeURIComponent(targetCategoryPath)}`);
-                const questions = await res.json();
+                loadedQuestions = await res.json();
 
-                if(questions.length === 0) {
-                    container.innerHTML = "<p style='color:#888;'>No questions found under this topic.</p>";
-                    return;
-                }
-
-                container.innerHTML = "";
-                questions.forEach((q, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'q-card';
-                    card.innerHTML = `
-                        <strong>Q${index + 1}:</strong> ${q.q}<br>
-                        <small>Options: ${q.options.join(', ')} | Ans Index: ${q.ans}</small><br>
-                        <small>Explanation: ${q.explanation || 'None'}</small>
-                        <div class="q-actions">
-                            <button class="btn btn-warning" style="padding:4px 10px; font-size:12px;" onclick="editSingleQuestion('${q._id}', '${encodeURIComponent(q.q)}', '${encodeURIComponent(q.options[0])}', '${encodeURIComponent(q.options[1])}', '${encodeURIComponent(q.options[2])}', '${encodeURIComponent(q.options[3])}', ${q.ans}, '${encodeURIComponent(q.explanation || '')}')">✏️ Edit</button>
-                            <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="deleteSingleQuestion('${q._id}')">🗑️ Delete</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
+                renderExistingQuestions();
             } catch (err) {
                 container.innerHTML = "<p style='color:red;'>Failed to load questions.</p>";
+            }
+        }
+
+        // Helper to convert index 0,1,2,3 to Letter (a, b, c, d)
+        function getLetter(index) {
+            const letters = ['a', 'b', 'c', 'd'];
+            return letters[index] || index;
+        }
+
+        // Render Normal Cards
+        function renderExistingQuestions() {
+            const container = document.getElementById('existingQuestionsContainer');
+            if(loadedQuestions.length === 0) {
+                container.innerHTML = "<p style='color:#888;'>No questions found under this topic.</p>";
+                return;
+            }
+
+            container.innerHTML = "";
+            loadedQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'q-card';
+                card.id = `q-card-${q._id}`;
+                card.innerHTML = `
+                    <strong>Q${index + 1}:</strong> ${q.q}<br>
+                    <small style="color:#555; display:block; margin-top:4px;">
+                        <b>Options:</b> (a) ${q.options[0]} | (b) ${q.options[1]} | (c) ${q.options[2]} | (d) ${q.options[3]} 
+                        <span style="color:#28a745; margin-left:10px;"><b>[ Correct Ans: (${getLetter(q.ans)}) ]</b></span>
+                    </small>
+                    <small style="color:#777; display:block; margin-top:2px;"><b>Explanation:</b> ${q.explanation || 'None'}</small>
+                    <div class="q-actions">
+                        <button class="btn btn-warning" style="padding:6px 14px; font-size:13px;" onclick="enableInlineEdit('${q._id}', ${index})">✏️ Edit</button>
+                        <button class="btn btn-danger" style="padding:6px 14px; font-size:13px;" onclick="deleteSingleQuestion('${q._id}')">🗑️ Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- IN-LINE EDITING WITH a, b, c, d LABELS ---
+        function enableInlineEdit(id, index) {
+            const q = loadedQuestions[index];
+            const card = document.getElementById(`q-card-${id}`);
+
+            card.style.borderLeft = "6px solid #007bff";
+            card.style.background = "#ffffff";
+
+            card.innerHTML = `
+                <div class="mcq-title" style="margin-bottom: 10px;">Editing MCQ #${index + 1}</div>
+                
+                <div class="form-group">
+                    <label>Question:</label>
+                    <input type="text" id="edit-q-${id}" value="${q.q.replace(/"/g, '&quot;')}" required>
+                </div>
+                
+                <label>Options (4 Choices):</label>
+                <div class="options-grid">
+                    <input type="text" id="edit-opt-0-${id}" value="${(q.options[0]||'').replace(/"/g, '&quot;')}" placeholder="Option (a)" required>
+                    <input type="text" id="edit-opt-1-${id}" value="${(q.options[1]||'').replace(/"/g, '&quot;')}" placeholder="Option (b)" required>
+                    <input type="text" id="edit-opt-2-${id}" value="${(q.options[2]||'').replace(/"/g, '&quot;')}" placeholder="Option (c)" required>
+                    <input type="text" id="edit-opt-3-${id}" value="${(q.options[3]||'').replace(/"/g, '&quot;')}" placeholder="Option (d)" required>
+                </div>
+                
+                <div class="ans-explanation-row">
+                    <div class="form-group">
+                        <label>Correct Answer:</label>
+                        <select id="edit-ans-${id}" required>
+                            <option value="0" ${q.ans === 0 ? 'selected' : ''}>Option (a)</option>
+                            <option value="1" ${q.ans === 1 ? 'selected' : ''}>Option (b)</option>
+                            <option value="2" ${q.ans === 2 ? 'selected' : ''}>Option (c)</option>
+                            <option value="3" ${q.ans === 3 ? 'selected' : ''}>Option (d)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Explanation (ব্যাখ্যা):</label>
+                        <input type="text" id="edit-exp-${id}" value="${(q.explanation||'').replace(/"/g, '&quot;')}" placeholder="Enter explanation...">
+                    </div>
+                </div>
+
+                <div class="q-actions" style="margin-top:10px;">
+                    <button class="btn btn-submit" style="width:auto; padding:8px 20px;" onclick="saveInlineEdit('${id}')">💾 Save Changes</button>
+                    <button class="btn btn-secondary" style="padding:8px 20px;" onclick="renderExistingQuestions()">❌ Cancel</button>
+                </div>
+            `;
+        }
+
+        async function saveInlineEdit(id) {
+            const mainCat = document.getElementById('mainCategory').value;
+            const subCat = document.getElementById('mainSubCategory').value;
+            const category = subCat ? `${mainCat}/${subCat}` : mainCat;
+
+            const updatedData = {
+                q: document.getElementById(`edit-q-${id}`).value,
+                options: [
+                    document.getElementById(`edit-opt-0-${id}`).value,
+                    document.getElementById(`edit-opt-1-${id}`).value,
+                    document.getElementById(`edit-opt-2-${id}`).value,
+                    document.getElementById(`edit-opt-3-${id}`).value
+                ],
+                ans: parseInt(document.getElementById(`edit-ans-${id}`).value),
+                explanation: document.getElementById(`edit-exp-${id}`).value || "",
+                category: category
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+                const result = await res.json();
+                if(result.success) {
+                    alert("✅ Question updated successfully!");
+                    loadExistingQuestions();
+                } else {
+                    alert("❌ Failed to update question!");
+                }
+            } catch (err) {
+                alert("❌ Error updating question!");
             }
         }
 
@@ -381,41 +479,6 @@
                 loadExistingQuestions();
             } catch (err) {
                 alert("Error deleting question!");
-            }
-        }
-
-        async function editSingleQuestion(id, q, opt0, opt1, opt2, opt3, ans, exp) {
-            const newQ = prompt("Edit Question:", decodeURIComponent(q));
-            if(!newQ) return;
-            const newOpt0 = prompt("Option 1:", decodeURIComponent(opt0));
-            const newOpt1 = prompt("Option 2:", decodeURIComponent(opt1));
-            const newOpt2 = prompt("Option 3:", decodeURIComponent(opt2));
-            const newOpt3 = prompt("Option 4:", decodeURIComponent(opt3));
-            const newAns = prompt("Correct Answer Index (0, 1, 2, 3):", ans);
-            const newExp = prompt("Explanation:", decodeURIComponent(exp));
-
-            const mainCat = document.getElementById('mainCategory').value;
-            const subCat = document.getElementById('mainSubCategory').value;
-            const category = subCat ? `${mainCat}/${subCat}` : mainCat;
-
-            const updatedData = {
-                q: newQ,
-                options: [newOpt0, newOpt1, newOpt2, newOpt3],
-                ans: parseInt(newAns),
-                explanation: newExp,
-                category: category
-            };
-
-            try {
-                await fetch(`${API_URL}/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatedData)
-                });
-                alert("Question updated successfully!");
-                loadExistingQuestions();
-            } catch (err) {
-                alert("Failed to update question!");
             }
         }
 
@@ -460,7 +523,7 @@
             }
         });
 
-        // --- Manual MCQ Fields Logics ---
+        // --- Manual MCQ Fields Logics WITH (a), (b), (c), (d) LABELS ---
         function addMCQField() {
             mcqCount++;
             const container = document.getElementById('mcqContainer');
@@ -479,20 +542,20 @@
                 
                 <label>Options (4 Choices):</label>
                 <div class="options-grid">
-                    <input type="text" class="opt-0" placeholder="Option 1 (Index 0)" required>
-                    <input type="text" class="opt-1" placeholder="Option 2 (Index 1)" required>
-                    <input type="text" class="opt-2" placeholder="Option 3 (Index 2)" required>
-                    <input type="text" class="opt-3" placeholder="Option 4 (Index 3)" required>
+                    <input type="text" class="opt-0" placeholder="Option (a)" required>
+                    <input type="text" class="opt-1" placeholder="Option (b)" required>
+                    <input type="text" class="opt-2" placeholder="Option (c)" required>
+                    <input type="text" class="opt-3" placeholder="Option (d)" required>
                 </div>
                 
                 <div class="ans-explanation-row">
                     <div class="form-group">
-                        <label>Correct Answer Index:</label>
+                        <label>Correct Answer:</label>
                         <select class="ans-input" required>
-                            <option value="0">Option 1 (Index 0)</option>
-                            <option value="1">Option 2 (Index 1)</option>
-                            <option value="2">Option 3 (Index 2)</option>
-                            <option value="3">Option 4 (Index 3)</option>
+                            <option value="0">Option (a)</option>
+                            <option value="1">Option (b)</option>
+                            <option value="2">Option (c)</option>
+                            <option value="3">Option (d)</option>
                         </select>
                     </div>
 
