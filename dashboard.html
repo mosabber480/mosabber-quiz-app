@@ -32,10 +32,19 @@
             font-size: 14px;
         }
 
-        .cat-mgr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .options-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
         .ans-explanation-row { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 10px; }
-        .cat-select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* 3-Level Select Target Topic Grid Style */
+        .cat-select-row { 
+            display: flex; 
+            gap: 15px; 
+            max-width: 900px; 
+        }
+        .cat-select-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
         
         /* MCQ Block / Card Style */
         .mcq-block { 
@@ -57,18 +66,89 @@
         .btn-danger { background-color: #dc3545; color: white; }
         .btn-warning { background-color: #ffc107; color: #212529; }
         .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
         
-        .cat-input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-cat-add { white-space: nowrap; min-width: 170px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
-        .cat-list { list-style: none; padding: 0; margin: 0; }
-        .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #e9ecef; }
+        /* Tree View Category Manager Styles */
+        .cat-input-group { display: flex; gap: 10px; margin-bottom: 20px; max-width: 600px; }
+        .btn-cat-add { white-space: nowrap; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
         
+        .tree-list { list-style: none; padding: 0; margin: 0; }
+        .tree-node { margin-bottom: 10px; }
+        
+        .cat-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #f8f9fa; 
+            padding: 12px 16px; 
+            border-radius: 6px; 
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .cat-header:hover { background: #eef2f5; }
+        .cat-title { font-weight: bold; color: #333; font-size: 15px; display: flex; align-items: center; gap: 8px; flex-grow: 1; }
+        .cat-actions { display: flex; gap: 8px; }
+        
+        /* Level 2 Sub-Categories */
+        .sub-tree-list { 
+            list-style: none; 
+            padding-left: 25px; 
+            margin-top: 8px; 
+            display: none; 
+        }
+        .sub-tree-list.active { display: block; }
+        
+        .sub-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #ffffff; 
+            padding: 8px 14px; 
+            border-radius: 5px; 
+            margin-bottom: 6px; 
+            border: 1px dashed #ccc; 
+            border-left: 3px solid #17a2b8;
+            cursor: pointer;
+        }
+
+        /* Level 3 Topics (Sub-Sub Category) */
+        .topic-tree-list {
+            list-style: none;
+            padding-left: 25px;
+            margin-top: 6px;
+            display: none;
+        }
+        .topic-tree-list.active { display: block; }
+
+        .topic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            border: 1px solid #eee;
+            border-left: 3px solid #28a745;
+        }
+
+        .edit-input {
+            padding: 4px 8px;
+            font-size: 14px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            width: auto;
+            max-width: 200px;
+        }
+
         .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ffc107; }
         .q-actions { display: flex; gap: 10px; margin-top: 15px; }
 
         @media (max-width: 900px) {
             .options-grid { grid-template-columns: 1fr 1fr; }
-            .ans-explanation-row, .cat-mgr-grid, .cat-select-row { grid-template-columns: 1fr; }
+            .ans-explanation-row { grid-template-columns: 1fr; }
+            .cat-select-row { flex-direction: column; max-width: 100%; }
             .cat-input-group { flex-direction: column; }
             .btn-cat-add { width: 100%; }
         }
@@ -76,60 +156,46 @@
 </head>
 <body>
 
-    <!-- ১. Category & Sub-Category Manager Section -->
+    <!-- ১. Category & Sub-Category Manager Section (3-Level Tree View) -->
     <div class="box">
-        <h3>📂 Manage Categories & Sub-Categories</h3>
-        <p style="color: #666; font-size: 14px;">Create and manage topics and sub-topics dynamically.</p>
+        <h3>📂 Manage Categories, Sub-Categories & Topics</h3>
+        <p style="color: #666; font-size: 14px;">Structure: <b>Main Category &gt; Sub-Category &gt; Topic</b>. Click on items to expand levels.</p>
         
-        <div class="cat-mgr-grid">
-            <div>
-                <label>Main Categories:</label>
-                <div class="cat-input-group">
-                    <input type="text" id="newCatName" placeholder="e.g. bangla, english, math">
-                    <button type="button" class="btn-cat-add" onclick="createCategory()">+ Add Category</button>
-                </div>
-                <ul class="cat-list" id="categoryList">
-                    <li>Loading Categories...</li>
-                </ul>
-            </div>
-
-            <div>
-                <label>Sub-Categories:</label>
-                <div class="form-group">
-                    <select id="parentCatSelect">
-                        <option value="">-- Select Parent Category --</option>
-                    </select>
-                </div>
-                <div class="cat-input-group">
-                    <input type="text" id="newSubCatName" placeholder="e.g. sondhi, grammar, algebra">
-                    <button type="button" class="btn-cat-add" onclick="createSubCategory()">+ Add Sub-Category</button>
-                </div>
-                <ul class="cat-list" id="subCategoryList">
-                    <li style="color:#888;">Select a parent category to view sub-categories.</li>
-                </ul>
-            </div>
+        <div class="cat-input-group">
+            <input type="text" id="newCatName" placeholder="Enter Main Category (e.g. prili, subjective)...">
+            <button type="button" class="btn-cat-add" onclick="createCategory()">+ Add Category</button>
         </div>
+
+        <ul class="tree-list" id="categoryTreeList">
+            <li>Loading Categories...</li>
+        </ul>
     </div>
 
-    <!-- ২. Target Selection -->
+    <!-- ২. Target Selection (3-Level Cascade) -->
     <div class="box">
         <h2>🎯 Select Target Topic</h2>
         <div class="cat-select-row">
             <div class="form-group">
-                <label>Select Category:</label>
-                <select id="mainCategory" onchange="onCategoryChange()" required>
+                <label>Main Category:</label>
+                <select id="mainCategory" onchange="onMainCategoryChange()" required>
                 </select>
             </div>
             <div class="form-group">
-                <label>Select Sub-Category:</label>
-                <select id="mainSubCategory" onchange="loadExistingQuestions()" required>
+                <label>Sub-Category:</label>
+                <select id="mainSubCategory" onchange="onSubCategoryChange()" required>
                     <option value="">-- Select Sub-Category --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Topic:</label>
+                <select id="mainTopic" onchange="loadExistingQuestions()" required>
+                    <option value="">-- Select Topic --</option>
                 </select>
             </div>
         </div>
     </div>
 
-    <!-- ৩. Existing Questions List (In-line Edit & Delete) - Opore Niye Aasa Hoyeche -->
+    <!-- ৩. Existing Questions List -->
     <div class="box" style="border-left: 6px solid #ffc107;">
         <h2>✏️ Manage Existing Questions (Edit / Delete)</h2>
         <p style="color: #666; font-size: 14px;">Selected Topic: <b id="selectedTopicLabel">None</b></p>
@@ -138,7 +204,7 @@
         </div>
     </div>
 
-    <!-- ৪. CSV Bulk Upload Section - Niche Namano Hoyeche -->
+    <!-- ৪. CSV Bulk Upload Section -->
     <div class="box" style="border-left: 6px solid #17a2b8;">
         <h3>📤 Bulk Upload Questions via CSV / Excel</h3>
         <form id="csvUploadForm">
@@ -165,6 +231,7 @@
         const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
         const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
 
+        // Structure: categoryData = { "prili": { "bangla": ["sondhi", "karok"], "english": ["grammar"] } }
         let categoryData = {};
         let loadedQuestions = [];
 
@@ -176,12 +243,17 @@
                 categoryData = {};
 
                 rawCategories.forEach(item => {
-                    if (item.includes('/')) {
-                        const [cat, sub] = item.split('/');
-                        if (!categoryData[cat]) categoryData[cat] = [];
-                        if (sub && !categoryData[cat].includes(sub)) categoryData[cat].push(sub);
-                    } else {
-                        if (!categoryData[item]) categoryData[item] = [];
+                    const parts = item.split('/');
+                    const main = parts[0];
+                    const sub = parts[1] || null;
+                    const topic = parts[2] || null;
+
+                    if(!categoryData[main]) categoryData[main] = {};
+                    if(sub) {
+                        if(!categoryData[main][sub]) categoryData[main][sub] = [];
+                        if(topic && !categoryData[main][sub].includes(topic)) {
+                            categoryData[main][sub].push(topic);
+                        }
                     }
                 });
 
@@ -191,38 +263,95 @@
             }
         }
 
+        // Render 3-Level Tree-View
         function renderCategoryUI() {
-            const catList = document.getElementById('categoryList');
-            const catSelect = document.getElementById('mainCategory');
-            const parentCatSelect = document.getElementById('parentCatSelect');
+            const treeContainer = document.getElementById('categoryTreeList');
+            const mainSelect = document.getElementById('mainCategory');
 
-            catList.innerHTML = "";
-            catSelect.innerHTML = "";
-            parentCatSelect.innerHTML = '<option value="">-- Select Parent Category --</option>';
+            treeContainer.innerHTML = "";
+            mainSelect.innerHTML = "";
 
-            const categories = Object.keys(categoryData);
+            const mainCategories = Object.keys(categoryData);
 
-            if (categories.length === 0) {
-                catList.innerHTML = `<li style="color:#888;">No active categories found.</li>`;
-                catSelect.innerHTML = `<option value="">No Categories Available</option>`;
+            if (mainCategories.length === 0) {
+                treeContainer.innerHTML = `<li style="color:#888;">No active categories found. Add one above!</li>`;
+                mainSelect.innerHTML = `<option value="">No Categories Available</option>`;
                 return;
             }
 
-            categories.forEach(cat => {
+            mainCategories.forEach(main => {
+                const subCats = Object.keys(categoryData[main] || {});
                 const li = document.createElement('li');
-                li.className = 'cat-item';
-                li.innerHTML = `
-                    <span><strong>${cat}</strong></span>
-                    <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteCategory('${cat}')">Delete</button>
-                `;
-                catList.appendChild(li);
+                li.className = 'tree-node';
 
-                catSelect.add(new Option(cat, cat));
-                parentCatSelect.add(new Option(cat, cat));
+                let subTreeHTML = '';
+                if(subCats.length > 0) {
+                    subCats.forEach(sub => {
+                        const topics = categoryData[main][sub] || [];
+                        let topicTreeHTML = '';
+                        
+                        if(topics.length > 0) {
+                            topics.forEach(topic => {
+                                topicTreeHTML += `
+                                    <li class="topic-item" id="topic-node-${main}-${sub}-${topic}">
+                                        <span id="topic-title-${main}-${sub}-${topic}">📌 <b>${topic}</b></span>
+                                        <div class="cat-actions" id="topic-actions-${main}-${sub}-${topic}">
+                                            <button class="btn btn-warning" style="padding:1px 6px; font-size:10px;" onclick="event.stopPropagation(); enableInlineTopicRename('${main}', '${sub}', '${topic}')">✏️ Rename</button>
+                                            <button class="btn btn-danger" style="padding:1px 6px; font-size:10px;" onclick="event.stopPropagation(); deleteTopic('${main}', '${sub}', '${topic}')">🗑️ Delete</button>
+                                        </div>
+                                    </li>
+                                `;
+                            } );
+                        } else {
+                            topicTreeHTML = `<li class="topic-item" style="color:#888; font-size:12px;">No topics in this sub-category.</li>`;
+                        }
+
+                        subTreeHTML += `
+                            <li class="tree-node">
+                                <div class="sub-header" onclick="toggleTree('topic-list-${main}-${sub}')">
+                                    <span id="sub-title-${main}-${sub}">📂 <b>${sub}</b> <small style="color:#666;">(${topics.length} topics)</small></span>
+                                    <div class="cat-actions" id="sub-actions-${main}-${sub}">
+                                        <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); promptAddTopic('${main}', '${sub}')">+ Add Topic</button>
+                                        <button class="btn btn-warning" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); enableInlineSubRename('${main}', '${sub}')">✏️ Rename</button>
+                                        <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); deleteSubCategory('${main}', '${sub}')">🗑️ Delete</button>
+                                    </div>
+                                </div>
+                                <ul class="topic-tree-list" id="topic-list-${main}-${sub}">
+                                    ${topicTreeHTML}
+                                </ul>
+                            </li>
+                        `;
+                    });
+                } else {
+                    subTreeHTML = `<li class="sub-header" style="color:#888; font-size:13px;">No sub-categories in this main category.</li>`;
+                }
+
+                li.innerHTML = `
+                    <div class="cat-header" onclick="toggleTree('sub-list-${main}')">
+                        <span class="cat-title" id="cat-title-${main}">📁 <b>${main}</b> <small style="color:#666; font-weight:normal;">(${subCats.length} sub-categories)</small></span>
+                        <div class="cat-actions" id="cat-actions-${main}">
+                            <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); promptAddSubCategory('${main}')">+ Add Sub-Cat</button>
+                            <button class="btn btn-warning" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); enableInlineCatRename('${main}')">✏️ Rename</button>
+                            <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); deleteCategory('${main}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                    <ul class="sub-tree-list" id="sub-list-${main}">
+                        ${subTreeHTML}
+                    </ul>
+                `;
+
+                treeContainer.appendChild(li);
+                mainSelect.add(new Option(main, main));
             });
 
-            onCategoryChange();
-            renderSubCatList();
+            onMainCategoryChange();
+        }
+
+        function toggleTree(elementId) {
+            const listElement = document.getElementById(elementId);
+            if(listElement) {
+                listElement.classList.toggle('active');
+            }
         }
 
         function createCategory() {
@@ -232,114 +361,199 @@
             if (!catName) { alert("Please enter a category name!"); return; }
             if (categoryData[catName]) { alert("Category already exists!"); return; }
 
-            categoryData[catName] = [];
+            categoryData[catName] = {};
             input.value = "";
             renderCategoryUI();
         }
 
-        function createSubCategory() {
-            const parent = document.getElementById('parentCatSelect').value;
-            const input = document.getElementById('newSubCatName');
-            const subName = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+        function promptAddSubCategory(main) {
+            const subNameRaw = prompt(`Add a new Sub-Category under '${main}' (e.g. bangla, english, ict):`);
+            if(!subNameRaw) return;
 
-            if (!parent) { alert("Please select a parent category first!"); return; }
-            if (!subName) { alert("Please enter a sub-category name!"); return; }
-            
-            if (!categoryData[parent]) categoryData[parent] = [];
-            if (categoryData[parent].includes(subName)) { alert("Sub-category already exists!"); return; }
+            const subName = subNameRaw.trim().toLowerCase().replace(/\s+/g, '-');
+            if(!subName) return;
 
-            categoryData[parent].push(subName);
-            input.value = "";
+            if (!categoryData[main]) categoryData[main] = {};
+            if (categoryData[main][subName]) { alert("Sub-category already exists!"); return; }
+
+            categoryData[main][subName] = [];
             renderCategoryUI();
-            document.getElementById('parentCatSelect').value = parent;
-            renderSubCatList();
+            toggleTree(`sub-list-${main}`);
         }
 
-        function renderSubCatList() {
-            const parent = document.getElementById('parentCatSelect').value;
-            const subCatList = document.getElementById('subCategoryList');
-            subCatList.innerHTML = "";
+        function promptAddTopic(main, sub) {
+            const topicRaw = prompt(`Add a Topic under '${main} > ${sub}' (e.g. sondhi, grammar, algebra):`);
+            if(!topicRaw) return;
 
-            if (!parent || !categoryData[parent] || categoryData[parent].length === 0) {
-                subCatList.innerHTML = `<li style="color:#888;">No sub-categories found for this topic.</li>`;
-                return;
-            }
+            const topic = topicRaw.trim().toLowerCase().replace(/\s+/g, '-');
+            if(!topic) return;
 
-            categoryData[parent].forEach(sub => {
-                const li = document.createElement('li');
-                li.className = 'cat-item';
-                li.innerHTML = `
-                    <span>${sub}</span>
-                    <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteSubCategory('${parent}', '${sub}')">Delete</button>
-                `;
-                subCatList.appendChild(li);
-            });
+            if (!categoryData[main][sub]) categoryData[main][sub] = [];
+            if (categoryData[main][sub].includes(topic)) { alert("Topic already exists!"); return; }
+
+            categoryData[main][sub].push(topic);
+            renderCategoryUI();
+            toggleTree(`sub-list-${main}`);
+            toggleTree(`topic-list-${main}-${sub}`);
         }
 
-        document.getElementById('parentCatSelect').addEventListener('change', renderSubCatList);
+        // --- INLINE RENAMES ---
+        function enableInlineCatRename(main) {
+            const titleElement = document.getElementById(`cat-title-${main}`);
+            const actionsElement = document.getElementById(`cat-actions-${main}`);
 
-        function onCategoryChange() {
-            const selectedCat = document.getElementById('mainCategory').value;
+            titleElement.innerHTML = `📁 <input type="text" class="edit-input" id="input-cat-${main}" value="${main}" onclick="event.stopPropagation()">`;
+            actionsElement.innerHTML = `
+                <button class="btn btn-success" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); saveCatRename('${main}')">💾 Save</button>
+                <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="event.stopPropagation(); renderCategoryUI()">❌ Cancel</button>
+            `;
+        }
+
+        function saveCatRename(oldCat) {
+            const inputVal = document.getElementById(`input-cat-${oldCat}`).value.trim().toLowerCase().replace(/\s+/g, '-');
+            if(!inputVal) return;
+            if(inputVal === oldCat) { renderCategoryUI(); return; }
+
+            if(categoryData[inputVal]) { alert("Category name exists!"); return; }
+
+            categoryData[inputVal] = categoryData[oldCat] || {};
+            delete categoryData[oldCat];
+            renderCategoryUI();
+        }
+
+        function enableInlineSubRename(main, oldSub) {
+            const titleElement = document.getElementById(`sub-title-${main}-${oldSub}`);
+            const actionsElement = document.getElementById(`sub-actions-${main}-${oldSub}`);
+
+            titleElement.innerHTML = `📂 <input type="text" class="edit-input" id="input-sub-${main}-${oldSub}" value="${oldSub}">`;
+            actionsElement.innerHTML = `
+                <button class="btn btn-success" style="padding:2px 8px; font-size:11px;" onclick="saveSubRename('${main}', '${oldSub}')">💾 Save</button>
+                <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="renderCategoryUI(); toggleTree('sub-list-${main}')">❌ Cancel</button>
+            `;
+        }
+
+        function saveSubRename(main, oldSub) {
+            const inputVal = document.getElementById(`input-sub-${main}-${oldSub}`).value.trim().toLowerCase().replace(/\s+/g, '-');
+            if(!inputVal || inputVal === oldSub) { renderCategoryUI(); return; }
+
+            if(categoryData[main][inputVal]) { alert("Sub-category name exists!"); return; }
+
+            categoryData[main][inputVal] = categoryData[main][oldSub] || [];
+            delete categoryData[main][oldSub];
+            renderCategoryUI();
+            toggleTree(`sub-list-${main}`);
+        }
+
+        function enableInlineTopicRename(main, sub, oldTopic) {
+            const titleElement = document.getElementById(`topic-title-${main}-${sub}-${oldTopic}`);
+            const actionsElement = document.getElementById(`topic-actions-${main}-${sub}-${oldTopic}`);
+
+            titleElement.innerHTML = `📌 <input type="text" class="edit-input" id="input-topic-${main}-${sub}-${oldTopic}" value="${oldTopic}">`;
+            actionsElement.innerHTML = `
+                <button class="btn btn-success" style="padding:1px 6px; font-size:10px;" onclick="saveTopicRename('${main}', '${sub}', '${oldTopic}')">💾 Save</button>
+                <button class="btn btn-secondary" style="padding:1px 6px; font-size:10px;" onclick="renderCategoryUI(); toggleTree('sub-list-${main}'); toggleTree('topic-list-${main}-${sub}')">❌ Cancel</button>
+            `;
+        }
+
+        function saveTopicRename(main, sub, oldTopic) {
+            const inputVal = document.getElementById(`input-topic-${main}-${sub}-${oldTopic}`).value.trim().toLowerCase().replace(/\s+/g, '-');
+            if(!inputVal || inputVal === oldTopic) { renderCategoryUI(); return; }
+
+            const idx = categoryData[main][sub].indexOf(oldTopic);
+            if(idx !== -1) categoryData[main][sub][idx] = inputVal;
+
+            renderCategoryUI();
+            toggleTree(`sub-list-${main}`);
+            toggleTree(`topic-list-${main}-${sub}`);
+        }
+
+        // --- CASCADE SELECT DROPDOWNS ---
+        function onMainCategoryChange() {
+            const mainCat = document.getElementById('mainCategory').value;
             const subSelect = document.getElementById('mainSubCategory');
             subSelect.innerHTML = "";
 
-            if (selectedCat && categoryData[selectedCat] && categoryData[selectedCat].length > 0) {
-                categoryData[selectedCat].forEach(sub => {
-                    subSelect.add(new Option(sub, sub));
-                });
+            if (mainCat && categoryData[mainCat]) {
+                const subCats = Object.keys(categoryData[mainCat]);
+                if(subCats.length > 0) {
+                    subCats.forEach(sub => subSelect.add(new Option(sub, sub)));
+                } else {
+                    subSelect.innerHTML = `<option value="">No sub-categories</option>`;
+                }
             } else {
-                subSelect.innerHTML = `<option value="">No sub-categories available</option>`;
+                subSelect.innerHTML = `<option value="">No sub-categories</option>`;
+            }
+            onSubCategoryChange();
+        }
+
+        function onSubCategoryChange() {
+            const mainCat = document.getElementById('mainCategory').value;
+            const subCat = document.getElementById('mainSubCategory').value;
+            const topicSelect = document.getElementById('mainTopic');
+            topicSelect.innerHTML = "";
+
+            if (mainCat && subCat && categoryData[mainCat] && categoryData[mainCat][subCat]) {
+                const topics = categoryData[mainCat][subCat];
+                if(topics.length > 0) {
+                    topics.forEach(t => topicSelect.add(new Option(t, t)));
+                } else {
+                    topicSelect.innerHTML = `<option value="">No topics available</option>`;
+                }
+            } else {
+                topicSelect.innerHTML = `<option value="">No topics available</option>`;
             }
             loadExistingQuestions();
         }
 
+        // --- DELETES ---
         async function deleteCategory(catName) {
-            if(!confirm(`Are you sure you want to delete category '${catName}'?`)) return;
-
+            if(!confirm(`Delete category '${catName}'?`)) return;
             delete categoryData[catName];
             renderCategoryUI();
-
-            try {
-                await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(catName)}`, { 
-                    method: 'DELETE' 
-                });
-            } catch (err) {
-                console.log("Category deleted locally.");
-            }
+            try { await fetch(`${CAT_API_URL}?category=${encodeURIComponent(catName)}`, { method: 'DELETE' }); } catch(e){}
         }
 
-        async function deleteSubCategory(catName, subName) {
-            if(!confirm(`Are you sure you want to delete sub-category '${subName}'?`)) return;
-
-            const fullCatPath = `${catName}/${subName}`;
-
-            if(categoryData[catName]) {
-                categoryData[catName] = categoryData[catName].filter(s => s !== subName);
-            }
+        async function deleteSubCategory(main, sub) {
+            if(!confirm(`Delete sub-category '${sub}'?`)) return;
+            delete categoryData[main][sub];
             renderCategoryUI();
+            toggleTree(`sub-list-${main}`);
+            try { await fetch(`${CAT_API_URL}?category=${encodeURIComponent(main + '/' + sub)}`, { method: 'DELETE' }); } catch(e){}
+        }
 
-            try {
-                await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(fullCatPath)}`, { 
-                    method: 'DELETE' 
-                });
-            } catch (err) {
-                console.log("Sub-category deleted locally.");
-            }
+        async function deleteTopic(main, sub, topic) {
+            if(!confirm(`Delete topic '${topic}'?`)) return;
+            categoryData[main][sub] = categoryData[main][sub].filter(t => t !== topic);
+            renderCategoryUI();
+            toggleTree(`sub-list-${main}`);
+            toggleTree(`topic-list-${main}-${sub}`);
+            try { await fetch(`${CAT_API_URL}?category=${encodeURIComponent(main + '/' + sub + '/' + topic)}`, { method: 'DELETE' }); } catch(e){}
+        }
+
+        // --- GET FULL CATEGORY PATH ---
+        function getSelectedCategoryPath() {
+            const main = document.getElementById('mainCategory').value;
+            const sub = document.getElementById('mainSubCategory').value;
+            const topic = document.getElementById('mainTopic').value;
+
+            if(!main) return "";
+            let path = main;
+            if(sub) path += `/${sub}`;
+            if(topic) path += `/${topic}`;
+            return path;
         }
 
         // --- Existing Questions Loader ---
         async function loadExistingQuestions() {
-            const mainCat = document.getElementById('mainCategory').value;
-            const subCat = document.getElementById('mainSubCategory').value;
+            const targetCategoryPath = getSelectedCategoryPath();
             const container = document.getElementById('existingQuestionsContainer');
             const label = document.getElementById('selectedTopicLabel');
 
-            if(!mainCat) {
+            if(!targetCategoryPath) {
                 container.innerHTML = "<p style='color:#888;'>No category selected.</p>";
                 return;
             }
 
-            const targetCategoryPath = subCat ? `${mainCat}/${subCat}` : mainCat;
             label.innerText = targetCategoryPath;
             container.innerHTML = "Loading questions...";
 
@@ -353,13 +567,11 @@
             }
         }
 
-        // Helper to convert index 0,1,2,3 to Bangla Letter (ক, খ, গ, ঘ)
         function getBanglaLetter(index) {
             const banglaLetters = ['ক', 'খ', 'গ', 'ঘ'];
             return banglaLetters[index] || index;
         }
 
-        // Render Normal Cards
         function renderExistingQuestions() {
             const container = document.getElementById('existingQuestionsContainer');
             if(loadedQuestions.length === 0) {
@@ -388,7 +600,6 @@
             });
         }
 
-        // --- IN-LINE EDITING WITH (ক), (খ), (গ), (ঘ) LABELS ---
         function enableInlineEdit(id, index) {
             const q = loadedQuestions[index];
             const card = document.getElementById(`q-card-${id}`);
@@ -437,9 +648,7 @@
         }
 
         async function saveInlineEdit(id) {
-            const mainCat = document.getElementById('mainCategory').value;
-            const subCat = document.getElementById('mainSubCategory').value;
-            const category = subCat ? `${mainCat}/${subCat}` : mainCat;
+            const category = getSelectedCategoryPath();
 
             const updatedData = {
                 q: document.getElementById(`edit-q-${id}`).value,
@@ -482,17 +691,15 @@
             }
         }
 
-        // --- CSV Upload Logic ---
+        // --- CSV UPLOAD LOGIC ---
         document.getElementById('csvUploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const mainCat = document.getElementById('mainCategory').value;
-            const subCat = document.getElementById('mainSubCategory').value;
+            const targetCategoryPath = getSelectedCategoryPath();
             const fileInput = document.getElementById('csvFileInput');
 
-            if (!mainCat) { alert("Please select a Category!"); return; }
+            if (!targetCategoryPath) { alert("Please select Target Category!"); return; }
             if (!fileInput.files[0]) { alert("Please choose a CSV file first!"); return; }
 
-            const targetCategoryPath = subCat ? `${mainCat}/${subCat}` : mainCat;
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             formData.append('category', targetCategoryPath);
@@ -523,7 +730,7 @@
             }
         });
 
-        // --- Manual MCQ Fields Logics WITH (ক), (খ), (গ), (ঘ) LABELS ---
+        // --- MANUAL MCQ BUILDER ---
         function addMCQField() {
             mcqCount++;
             const container = document.getElementById('mcqContainer');
@@ -575,12 +782,10 @@
 
         document.getElementById('masterQuizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const mainCat = document.getElementById('mainCategory').value;
-            const subCat = document.getElementById('mainSubCategory').value;
+            const targetCategoryPath = getSelectedCategoryPath();
             
-            if(!mainCat) { alert("Please select a Category!"); return; }
+            if(!targetCategoryPath) { alert("Please select Target Category!"); return; }
 
-            const targetCategoryPath = subCat ? `${mainCat}/${subCat}` : mainCat;
             const mcqBlocks = document.querySelectorAll('.mcq-block');
             let successCount = 0;
             let hasError = false;
