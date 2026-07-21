@@ -292,39 +292,40 @@
         }
 
         async function deleteCategory(catName) {
-            if(!confirm(`Delete category '${catName}' and all its questions?`)) return;
+            if(!confirm(`Are you sure you want to delete category '${catName}'?`)) return;
 
+            // ১. UI থেকে সাথে সাথে মুছে ফেলুন
+            delete categoryData[catName];
+            renderCategoryUI();
+
+            // ২. ব্যাকগ্রাউন্ডে ডাটাবেস এপিআই কল করুন
             try {
-                const res = await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(catName)}`, { method: 'DELETE' });
-                const result = await res.json();
-                if(result.success) {
-                    alert(`Category '${catName}' deleted!`);
-                    delete categoryData[catName];
-                    renderCategoryUI();
-                } else {
-                    alert("Error deleting category!");
-                }
+                await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(catName)}`, { 
+                    method: 'DELETE' 
+                });
             } catch (err) {
-                alert("Error deleting category!");
+                console.log("Category deleted locally.");
             }
         }
 
         async function deleteSubCategory(catName, subName) {
-            const fullCatPath = `${catName}/${subName}`;
-            if(!confirm(`Delete sub-category '${subName}'?`)) return;
+            if(!confirm(`Are you sure you want to delete sub-category '${subName}'?`)) return;
 
+            const fullCatPath = `${catName}/${subName}`;
+
+            // ১. UI থেকে সাথে সাথে মুছে ফেলুন
+            if(categoryData[catName]) {
+                categoryData[catName] = categoryData[catName].filter(s => s !== subName);
+            }
+            renderCategoryUI();
+
+            // ২. ব্যাকগ্রাউন্ডে এপিআই কল
             try {
-                const res = await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(fullCatPath)}`, { method: 'DELETE' });
-                const result = await res.json();
-                if(result.success) {
-                    alert(`Sub-category '${subName}' deleted!`);
-                    categoryData[catName] = categoryData[catName].filter(s => s !== subName);
-                    renderCategoryUI();
-                } else {
-                    alert("Error deleting sub-category!");
-                }
+                await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(fullCatPath)}`, { 
+                    method: 'DELETE' 
+                });
             } catch (err) {
-                alert("Error deleting sub-category!");
+                console.log("Sub-category deleted locally.");
             }
         }
 
