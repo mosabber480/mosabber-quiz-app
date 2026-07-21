@@ -32,36 +32,11 @@
             font-size: 14px;
         }
 
-        /* Category Manager Grid */
-        .cat-mgr-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        /* 4 Options Grid (In 1 Line) */
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        /* Answer & Explanation Row */
-        .ans-explanation-row {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
-            margin-bottom: 10px;
-        }
-
-        .cat-select-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+        .cat-mgr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .options-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+        .ans-explanation-row { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 10px; }
+        .cat-select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
-        /* MCQ Block Card */
         .mcq-block { 
             background: #ffffff; 
             padding: 25px; 
@@ -74,38 +49,22 @@
         }
         .mcq-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #007bff; }
         
-        /* Buttons */
         .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-add { background-color: #007bff; color: white; margin-bottom: 20px; width: 100%; }
         .btn-submit { background-color: #28a745; color: white; width: 100%; font-size: 16px; padding: 12px; }
         .btn-csv { background-color: #17a2b8; color: white; width: 100%; font-size: 15px; padding: 11px; margin-top: 10px; }
         .btn-danger { background-color: #dc3545; color: white; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
         
-        /* Category Management UI & Buttons */
-        .cat-input-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 15px; 
-        }
-
-        .btn-cat-add {
-            white-space: nowrap; 
-            min-width: 170px;    
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-cat-add:hover { background-color: #0056b3; }
+        .cat-input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-cat-add { white-space: nowrap; min-width: 170px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
         .cat-list { list-style: none; padding: 0; margin: 0; }
         .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #e9ecef; }
         
+        /* Questions Table / List UI */
+        .q-card { background: #fdfdfd; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 12px; }
+        .q-actions { display: flex; gap: 10px; margin-top: 10px; }
+
         @media (max-width: 900px) {
             .options-grid { grid-template-columns: 1fr 1fr; }
             .ans-explanation-row, .cat-mgr-grid, .cat-select-row { grid-template-columns: 1fr; }
@@ -122,7 +81,6 @@
         <p style="color: #666; font-size: 14px;">Create and manage topics and sub-topics dynamically.</p>
         
         <div class="cat-mgr-grid">
-            <!-- Category Management -->
             <div>
                 <label>Main Categories:</label>
                 <div class="cat-input-group">
@@ -134,7 +92,6 @@
                 </ul>
             </div>
 
-            <!-- Sub-Category Management -->
             <div>
                 <label>Sub-Categories:</label>
                 <div class="form-group">
@@ -153,19 +110,18 @@
         </div>
     </div>
 
-    <!-- ২. Target Selection (Common for Both Uploads) -->
+    <!-- ২. Target Selection -->
     <div class="box">
         <h2>🎯 Select Target Topic</h2>
         <div class="cat-select-row">
             <div class="form-group">
                 <label>Select Category:</label>
-                <select id="mainCategory" onchange="updateSubCatDropdown()" required>
-                    <!-- Categories will load dynamically -->
+                <select id="mainCategory" onchange="onCategoryChange()" required>
                 </select>
             </div>
             <div class="form-group">
                 <label>Select Sub-Category:</label>
-                <select id="mainSubCategory" required>
+                <select id="mainSubCategory" onchange="loadExistingQuestions()" required>
                     <option value="">-- Select Sub-Category --</option>
                 </select>
             </div>
@@ -175,8 +131,6 @@
     <!-- ৩. CSV Bulk Upload Section -->
     <div class="box" style="border-left: 6px solid #17a2b8;">
         <h3>📤 Bulk Upload Questions via CSV / Excel</h3>
-        <p style="color: #666; font-size: 14px;">Select category above, choose your .csv file, and click upload.</p>
-        
         <form id="csvUploadForm">
             <div class="form-group">
                 <label>Select CSV File:</label>
@@ -189,13 +143,20 @@
     <!-- ৪. Manual MCQ Builder Section -->
     <div class="box">
         <h2>📝 Manual Quiz Builder</h2>
-        <p style="text-align: center; color: #666;">Add questions one by one manually if needed.</p>
-        
         <form id="masterQuizForm">
             <div id="mcqContainer"></div>
             <button type="button" class="btn btn-add" onclick="addMCQField()">➕ Add More MCQ</button>
             <button type="submit" class="btn btn-submit">🚀 Submit All Questions</button>
         </form>
+    </div>
+
+    <!-- ৫. Existing Questions List (Edit & Delete Management) -->
+    <div class="box" style="border-left: 6px solid #ffc107;">
+        <h2>✏️ Manage Existing Questions (Edit / Delete)</h2>
+        <p style="color: #666; font-size: 14px;">Selected Topic: <b id="selectedTopicLabel">None</b></p>
+        <div id="existingQuestionsContainer">
+            <p style="color:#888;">Select a category above to view and edit questions.</p>
+        </div>
     </div>
 
     <script>
@@ -205,7 +166,6 @@
 
         let categoryData = {};
 
-        // --- Category Management Logics ---
         async function loadCategories() {
             try {
                 const res = await fetch(CAT_API_URL);
@@ -259,7 +219,7 @@
                 parentCatSelect.add(new Option(cat, cat));
             });
 
-            updateSubCatDropdown();
+            onCategoryChange();
             renderSubCatList();
         }
 
@@ -316,7 +276,7 @@
 
         document.getElementById('parentCatSelect').addEventListener('change', renderSubCatList);
 
-        function updateSubCatDropdown() {
+        function onCategoryChange() {
             const selectedCat = document.getElementById('mainCategory').value;
             const subSelect = document.getElementById('mainSubCategory');
             subSelect.innerHTML = "";
@@ -328,44 +288,133 @@
             } else {
                 subSelect.innerHTML = `<option value="">No sub-categories available</option>`;
             }
+            loadExistingQuestions();
         }
 
         async function deleteCategory(catName) {
             if(!confirm(`Delete category '${catName}' and all its questions?`)) return;
 
             try {
-                const res = await fetch(`${API_URL}`);
-                const questions = await res.json();
-                
-                for (let q of questions) {
-                    if (q.category === catName || q.category.startsWith(`${catName}/`)) {
-                        await fetch(`${API_URL}/${q._id}`, { method: 'DELETE' });
-                    }
+                const res = await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(catName)}`, { method: 'DELETE' });
+                const result = await res.json();
+                if(result.success) {
+                    alert(`Category '${catName}' deleted!`);
+                    delete categoryData[catName];
+                    renderCategoryUI();
+                } else {
+                    alert("Error deleting category!");
                 }
-                delete categoryData[catName];
-                renderCategoryUI();
-                alert(`Category '${catName}' deleted!`);
             } catch (err) {
                 alert("Error deleting category!");
             }
         }
 
         async function deleteSubCategory(catName, subName) {
+            const fullCatPath = `${catName}/${subName}`;
             if(!confirm(`Delete sub-category '${subName}'?`)) return;
 
-            const fullCatPath = `${catName}/${subName}`;
             try {
-                const res = await fetch(`${API_URL}?category=${encodeURIComponent(fullCatPath)}`);
-                const questions = await res.json();
-                for (let q of questions) {
-                    await fetch(`${API_URL}/${q._id}`, { method: 'DELETE' });
+                const res = await fetch(`https://mosabber-quiz-app.onrender.com/api/categories?category=${encodeURIComponent(fullCatPath)}`, { method: 'DELETE' });
+                const result = await res.json();
+                if(result.success) {
+                    alert(`Sub-category '${subName}' deleted!`);
+                    categoryData[catName] = categoryData[catName].filter(s => s !== subName);
+                    renderCategoryUI();
+                } else {
+                    alert("Error deleting sub-category!");
                 }
-
-                categoryData[catName] = categoryData[catName].filter(s => s !== subName);
-                renderCategoryUI();
-                alert(`Sub-category '${subName}' deleted!`);
             } catch (err) {
                 alert("Error deleting sub-category!");
+            }
+        }
+
+        // --- Existing Questions Loader & Editor ---
+        async function loadExistingQuestions() {
+            const mainCat = document.getElementById('mainCategory').value;
+            const subCat = document.getElementById('mainSubCategory').value;
+            const container = document.getElementById('existingQuestionsContainer');
+            const label = document.getElementById('selectedTopicLabel');
+
+            if(!mainCat) {
+                container.innerHTML = "<p style='color:#888;'>No category selected.</p>";
+                return;
+            }
+
+            const targetCategoryPath = subCat ? `${mainCat}/${subCat}` : mainCat;
+            label.innerText = targetCategoryPath;
+            container.innerHTML = "Loading questions...";
+
+            try {
+                const res = await fetch(`${API_URL}?category=${encodeURIComponent(targetCategoryPath)}`);
+                const questions = await res.json();
+
+                if(questions.length === 0) {
+                    container.innerHTML = "<p style='color:#888;'>No questions found under this topic.</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+                questions.forEach((q, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'q-card';
+                    card.innerHTML = `
+                        <strong>Q${index + 1}:</strong> ${q.q}<br>
+                        <small>Options: ${q.options.join(', ')} | Ans Index: ${q.ans}</small><br>
+                        <small>Explanation: ${q.explanation || 'None'}</small>
+                        <div class="q-actions">
+                            <button class="btn btn-warning" style="padding:4px 10px; font-size:12px;" onclick="editSingleQuestion('${q._id}', '${encodeURIComponent(q.q)}', '${encodeURIComponent(q.options[0])}', '${encodeURIComponent(q.options[1])}', '${encodeURIComponent(q.options[2])}', '${encodeURIComponent(q.options[3])}', ${q.ans}, '${encodeURIComponent(q.explanation || '')}')">✏️ Edit</button>
+                            <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="deleteSingleQuestion('${q._id}')">🗑️ Delete</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                container.innerHTML = "<p style='color:red;'>Failed to load questions.</p>";
+            }
+        }
+
+        async function deleteSingleQuestion(id) {
+            if(!confirm("Are you sure you want to delete this question?")) return;
+            try {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                loadExistingQuestions();
+            } catch (err) {
+                alert("Error deleting question!");
+            }
+        }
+
+        async function editSingleQuestion(id, q, opt0, opt1, opt2, opt3, ans, exp) {
+            const newQ = prompt("Edit Question:", decodeURIComponent(q));
+            if(!newQ) return;
+            const newOpt0 = prompt("Option 1:", decodeURIComponent(opt0));
+            const newOpt1 = prompt("Option 2:", decodeURIComponent(opt1));
+            const newOpt2 = prompt("Option 3:", decodeURIComponent(opt2));
+            const newOpt3 = prompt("Option 4:", decodeURIComponent(opt3));
+            const newAns = prompt("Correct Answer Index (0, 1, 2, 3):", ans);
+            const newExp = prompt("Explanation:", decodeURIComponent(exp));
+
+            const mainCat = document.getElementById('mainCategory').value;
+            const subCat = document.getElementById('mainSubCategory').value;
+            const category = subCat ? `${mainCat}/${subCat}` : mainCat;
+
+            const updatedData = {
+                q: newQ,
+                options: [newOpt0, newOpt1, newOpt2, newOpt3],
+                ans: parseInt(newAns),
+                explanation: newExp,
+                category: category
+            };
+
+            try {
+                await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+                alert("Question updated successfully!");
+                loadExistingQuestions();
+            } catch (err) {
+                alert("Failed to update question!");
             }
         }
 
@@ -380,13 +429,12 @@
             if (!fileInput.files[0]) { alert("Please choose a CSV file first!"); return; }
 
             const targetCategoryPath = subCat ? `${mainCat}/${subCat}` : mainCat;
-
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             formData.append('category', targetCategoryPath);
 
             const uploadBtn = e.target.querySelector('button');
-            uploadBtn.innerText = "Uploading CSV... Please wait...";
+            uploadBtn.innerText = "Uploading CSV...";
             uploadBtn.disabled = true;
 
             try {
@@ -394,12 +442,12 @@
                     method: 'POST',
                     body: formData
                 });
-
                 const result = await res.json();
                 if (result.success) {
                     alert(`🎉 Success! ${result.count} questions added to '${targetCategoryPath}'.`);
                     fileInput.value = "";
                     loadCategories();
+                    loadExistingQuestions();
                 } else {
                     alert(`❌ Error: ${result.message || result.error}`);
                 }
@@ -411,7 +459,7 @@
             }
         });
 
-        // --- MCQ Fields Logics ---
+        // --- Manual MCQ Fields Logics ---
         function addMCQField() {
             mcqCount++;
             const container = document.getElementById('mcqContainer');
@@ -461,7 +509,6 @@
             if(block) block.remove();
         }
 
-        // --- Submit Logics ---
         document.getElementById('masterQuizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const mainCat = document.getElementById('mainCategory').value;
@@ -475,7 +522,7 @@
             let hasError = false;
 
             const submitBtn = document.querySelector('.btn-submit');
-            submitBtn.innerText = "Saving Data... Please wait...";
+            submitBtn.innerText = "Saving Data...";
             submitBtn.disabled = true;
 
             for (let block of mcqBlocks) {
@@ -515,8 +562,9 @@
                 mcqCount = 0;
                 addMCQField();
                 loadCategories();
+                loadExistingQuestions();
             } else {
-                alert(`Added ${successCount} questions, but encountered issues with some.`);
+                alert(`Added ${successCount} questions, but encountered issues.`);
             }
         });
 
