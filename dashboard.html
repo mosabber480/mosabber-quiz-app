@@ -13,6 +13,35 @@
             max-width: 1600px; 
             margin: 0 auto; 
         }
+
+        /* Top Header Action Bar */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .btn-home {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        .btn-home:hover {
+            background-color: #0056b3;
+        }
+
         .box { 
             background: white; 
             padding: 25px 30px; 
@@ -152,10 +181,17 @@
             .btn-cat-add { width: 100%; }
             .inline-add-box { flex-direction: column; }
             .topic-header-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 12px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- 0. Header with Home Button -->
+    <div class="dashboard-header">
+        <h2 style="margin:0; color:#2c3e50;">⚙️ MCQ Master Dashboard</h2>
+        <a href="index.html" class="btn-home">🏠 হোম পেজ দেখুন</a>
+    </div>
 
     <!-- ১. Category & Sub-Category Manager Section -->
     <div class="box">
