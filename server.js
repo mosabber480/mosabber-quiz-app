@@ -2,6 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
+const bcrypt = require('bcryptjs');
+
+// Authentication & Authorization Middlewares and Models
+const User = require('./models/User');
+const authRoutes = require('./routes/auth');
+const { verifyToken, authorizeRoles, checkSubscription } = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -29,10 +35,139 @@ const questionSchema = new mongoose.Schema({
 
 const Question = mongoose.model('Question', questionSchema);
 
-// ------------------- API ENDPOINTS -------------------
+// ------------------- AUTHENTICATION ROUTES -------------------
+app.use('/api/auth', authRoutes);
 
-// 1. Get Questions (Filtered by Category if provided)
-app.get('/api/questions', async (req, res) => {
+// Change Password API (Any Logged In User)
+app.put('/api/auth/change-password', verifyToken, async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.json({ success: true, message: 'Password updated successfully!' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+// ------------------- USER & SUBSCRIPTION MANAGEMENT (Owner/Admin) -------------------
+
+// 1. Get All Users (Only Owner and Admin can see)
+app.get('/api/users', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const users = await User.find().select('-password').sort({ createdAt: -1 });
+        res.json({ success: true, users });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 2. Update Subscription Plan for Customer (Owner and Admin only)
+app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
+    try {
+        const { plan } = req.body; // '1_month', '3_months', '6_months', '1_year', '2_years', 'none'
+        const user = await User.findById(req.params.userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        let startDate = new Date();
+        let endDate = new Date();
+
+        // Calculate Plan Duration
+        if (plan === '1_month') endDate.setMonth(endDate.getMonth() + 1);
+        else if (plan === '3_months') endDate.setMonth(endDate.getMonth() + 3);
+        else if (plan === '6_months') endDate.setMonth(endDate.getMonth() + 6);
+        else if (plan === '1_year') endDate.setFullYear(endDate.getFullYear() + 1);
+        else if (plan === '2_years') endDate.setFullYear(endDate.getFullYear() + 2);
+        else if (plan === 'none') {
+            startDate = null;
+            endDate = null;
+        }
+
+        user.subscription = {
+            plan: plan,
+            startDate: startDate,
+            endDate: endDate,
+            active: plan !== 'none'
+        };
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message: `Subscription plan updated to ${plan}`,
+            subscription: user.subscription
+        });
+
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 3. Create New Admin (Only Owner)
+app.post('/api/users/create-admin', verifyToken, authorizeRoles('owner'), async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ success: false, message: 'User with this email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newAdmin = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role: 'admin'
+        });
+
+        await newAdmin.save();
+        res.status(201).json({ success: true, message: 'Admin account created successfully!' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 4. Delete User/Admin (Only Owner)
+app.delete('/api/users/:userId', verifyToken, authorizeRoles('owner'), async (req, res) => {
+    try {
+        const targetUser = await User.findById(req.params.userId);
+        if (!targetUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if (targetUser.role === 'owner') {
+            return res.status(403).json({ success: false, message: 'Owner account cannot be deleted!' });
+        }
+
+        await User.findByIdAndDelete(req.params.userId);
+        res.json({ success: true, message: 'User deleted successfully!' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+// ------------------- QUESTION API ENDPOINTS -------------------
+
+// 1. Get Questions (Filtered by Category if provided) - Subscription Protected for Customers
+app.get('/api/questions', verifyToken, checkSubscription, async (req, res) => {
     try {
         const { category } = req.query;
         let filter = {};
@@ -46,8 +181,8 @@ app.get('/api/questions', async (req, res) => {
     }
 });
 
-// 2. Add New Single Question
-app.post('/api/questions', async (req, res) => {
+// 2. Add New Single Question (Owner & Admin only)
+app.post('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { q, options, ans, explanation, category } = req.body;
         const newQuestion = new Question({ q, options, ans, explanation, category });
@@ -58,8 +193,8 @@ app.post('/api/questions', async (req, res) => {
     }
 });
 
-// 3. Update Question
-app.put('/api/questions/:id', async (req, res) => {
+// 3. Update Question (Owner & Admin only)
+app.put('/api/questions/:id', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const updatedQuestion = await Question.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json({ success: true, data: updatedQuestion });
@@ -68,8 +203,8 @@ app.put('/api/questions/:id', async (req, res) => {
     }
 });
 
-// 4. Delete Single Question
-app.delete('/api/questions/:id', async (req, res) => {
+// 4. Delete Single Question (Owner & Admin only)
+app.delete('/api/questions/:id', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         await Question.findByIdAndDelete(req.params.id);
         res.json({ success: true, message: 'Question deleted' });
@@ -78,8 +213,8 @@ app.delete('/api/questions/:id', async (req, res) => {
     }
 });
 
-// 5. Bulk Delete Questions by Category Path
-app.delete('/api/questions', async (req, res) => {
+// 5. Bulk Delete Questions by Category Path (Owner & Admin only)
+app.delete('/api/questions', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const { category } = req.query;
         if (!category) {
@@ -102,8 +237,8 @@ app.get('/api/categories', async (req, res) => {
     }
 });
 
-// 7. Robust Bulk Upload CSV (Native Parsing without external streamer crashes)
-app.post('/api/questions/upload-csv', upload.single('file'), async (req, res) => {
+// 7. Robust Bulk Upload CSV (Owner & Admin only)
+app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admin'), upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, error: 'No file uploaded' });
