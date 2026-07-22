@@ -27,14 +27,41 @@
             margin-top: 5px;
             margin-bottom: 5px;
         }
+
+        /* Home Button Styling (Converted to Button UI) */
         .btn-back {
-            display: inline-block;
-            margin-bottom: 15px;
-            color: #007bff;
+            background-color: #007bff;
+            color: white;
             text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 13px;
             font-weight: bold;
-            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
         }
+        .btn-back:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        /* Reset Button Styling */
+        .btn-reset {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-reset:hover {
+            background-color: #27ae60;
+        }
+
         .score-board {
             position: fixed;
             top: 20px;
@@ -67,6 +94,43 @@
             font-size: 13px;
             font-weight: 600;
             text-align: right;
+        }
+
+        /* Controls Bar Container */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .switch-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .switch-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+        .switch-label input {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
         }
 
         .question-block {
@@ -116,6 +180,21 @@
             }
             .negative-mark-note {
                 text-align: left;
+            }
+            .controls-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .nav-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            .switch-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
             }
             .options-container {
                 flex-direction: column;
@@ -191,8 +270,6 @@
 <div class="score-board">স্কোর: <span id="live-score">0</span></div>
 
 <div class="container">
-    <a href="index.html" class="btn-back">⬅️ হোম পেজে ফিরে যান</a>
-    
     <h1 id="main-title">Custom Developing</h1>
     <h2 id="topic-title">টপিক লোড হচ্ছে...</h2>
     
@@ -202,7 +279,26 @@
         <div class="negative-mark-note">[ প্রতিটি ভুল উত্তরের জন্য ০.৫ নম্বর কাটা যাবে ]</div>
     </div>
     
-    <hr style="margin-top: 8px; border: 0; border-top: 1px solid #ccc;"><br>
+    <hr style="margin-top: 8px; border: 0; border-top: 1px solid #ccc;">
+
+    <!-- Controls Bar: Back & Reset Buttons on Left, Switches on Right -->
+    <div class="controls-bar">
+        <div class="nav-actions">
+            <a href="index.html" class="btn-back">⬅️ হোম পেজে ফিরে যান</a>
+            <button class="btn-reset" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>
+        </div>
+
+        <div class="switch-group">
+            <label class="switch-label">
+                <input type="checkbox" id="toggle-answer" checked>
+                সঠিক উত্তর দেখান
+            </label>
+            <label class="switch-label">
+                <input type="checkbox" id="toggle-explanation" checked>
+                ব্যাখ্যা দেখান
+            </label>
+        </div>
+    </div>
 
     <div id="quiz-wrapper">
         <p style="text-align:center; color:#888;">ডাটাবেজ থেকে প্রশ্ন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
@@ -228,6 +324,7 @@
         : null;
 
     let quizData = [];
+    let answeredQuestions = {}; // উত্তর দেওয়া প্রশ্নগুলোর ট্র্যাক রাখার জন্য
     let score = 0;
     let correctCount = 0;
     let incorrectCount = 0;
@@ -238,10 +335,32 @@
     const incorrectCountDisplay = document.getElementById('incorrect-count-display');
     const finalScoreDisplay = document.getElementById('final-score');
 
+    // Toggle Checkbox Elements
+    const toggleAnswer = document.getElementById('toggle-answer');
+    const toggleExplanation = document.getElementById('toggle-explanation');
+
     // Bangla Choice Letter Mapping
     function getBanglaLetter(index) {
         const letters = ['ক', 'খ', 'গ', 'ঘ'];
         return letters[index] || index;
+    }
+
+    // Dynamic Display Update Event Listeners
+    toggleAnswer.addEventListener('change', updateVisibility);
+    toggleExplanation.addEventListener('change', updateVisibility);
+
+    function updateVisibility() {
+        Object.keys(answeredQuestions).forEach(qIndex => {
+            const ansElem = document.getElementById(`ans-text-${qIndex}`);
+            if (ansElem) {
+                ansElem.style.display = toggleAnswer.checked ? 'block' : 'none';
+            }
+
+            const expElem = document.getElementById(`exp-text-${qIndex}`);
+            if (expElem) {
+                expElem.style.display = toggleExplanation.checked ? 'block' : 'none';
+            }
+        });
     }
 
     async function fetchQuestionsFromDB() {
@@ -254,15 +373,12 @@
             return;
         }
 
-        // Category Path ভাগ করে Title সেট করা (e.g. prili/bangla/shondhi)
         const parts = currentCategory.split('/');
         const mainCat = parts[0] || '';
         const subCat = parts[1] || '';
         const topic = parts[2] || subCat || mainCat;
 
         topicTitle.innerText = `টপিক: ${topic.replace(/-/g, ' ')}`;
-        
-        // 📁 আইকনসহ ক্যাটাগরি পাথ প্রদর্শন
         categoryPath.innerHTML = `📁 ${mainCat} &gt; ${subCat ? subCat + ' &gt; ' : ''}${topic}`;
 
         try {
@@ -299,7 +415,7 @@
             item.options.forEach((opt, oIndex) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.innerText = opt;
+                btn.innerText = `(${getBanglaLetter(oIndex)}) ${opt}`;
                 
                 btn.onclick = () => handleAnswer(btn, qIndex, oIndex, optContainer);
                 optContainer.appendChild(btn);
@@ -349,17 +465,29 @@
             incorrectCount += 1;
         }
 
+        answeredQuestions[qIndex] = true;
+
         liveScoreDisplay.innerText = score;
         correctCountDisplay.innerText = correctCount;
         incorrectCountDisplay.innerText = incorrectCount;
         finalScoreDisplay.innerText = `আপনার মোট প্রাপ্ত স্কোর: ${score}`;
 
-        // Show Answer & Explanation
-        const ansElem = document.getElementById(`ans-text-${qIndex}`);
-        if (ansElem) ansElem.style.display = 'block';
+        updateVisibility();
+    }
 
-        const expElem = document.getElementById(`exp-text-${qIndex}`);
-        if (expElem) expElem.style.display = 'block';
+    // Reset Quiz Functionality
+    function resetQuiz() {
+        score = 0;
+        correctCount = 0;
+        incorrectCount = 0;
+        answeredQuestions = {};
+
+        liveScoreDisplay.innerText = 0;
+        correctCountDisplay.innerText = 0;
+        incorrectCountDisplay.innerText = 0;
+        finalScoreDisplay.innerText = 'আপনার মোট প্রাপ্ত স্কোর: ০';
+
+        renderQuizUI();
     }
 
     window.onload = fetchQuestionsFromDB;
