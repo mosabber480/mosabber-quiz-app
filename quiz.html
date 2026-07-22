@@ -20,30 +20,38 @@
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h1, h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-top: 5px;
-            margin-bottom: 5px;
+            position: relative; /* Absolute positioning target */
+            overflow: hidden; /* Ensures border-radius stays sharp at edges */
         }
 
-        /* Home Button Styling (Converted to Button UI) */
+        /* Absolutely Positioned Home Button (Top-Left Edge) */
         .btn-back {
+            position: absolute;
+            top: 0;
+            left: 0;
             background-color: #007bff;
             color: white;
             text-decoration: none;
-            padding: 6px 14px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-bottom-right-radius: 6px; /* Smooth inner edge */
+            border-top-left-radius: 8px;     /* Matches container border-radius */
             font-size: 13px;
             font-weight: bold;
             display: inline-flex;
             align-items: center;
             transition: background-color 0.2s ease;
+            z-index: 10;
         }
         .btn-back:hover {
             background-color: #0056b3;
             color: white;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 10px;
+            margin-bottom: 5px;
         }
 
         /* Reset Button Styling */
@@ -76,12 +84,12 @@
             z-index: 1000;
         }
 
-        /* Sub-header Container: Left and Right Alignment */
+        /* Sub-header Container */
         .header-info-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 15px;
+            margin-top: 20px;
         }
         .exam-path {
             color: #7f8c8d;
@@ -107,12 +115,43 @@
             padding: 8px 15px;
             border-radius: 6px;
             border: 1px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 12px;
         }
         .nav-actions {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
+        /* Integrated Right Action Controls Group */
+        .right-controls-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .select-dropdown {
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            background-color: #fff;
+            cursor: pointer;
+            outline: none;
+        }
+        .select-dropdown:focus {
+            border-color: #007bff;
+        }
+
         .switch-group {
             display: flex;
             align-items: center;
@@ -190,6 +229,15 @@
                 width: 100%;
                 justify-content: flex-start;
                 flex-wrap: wrap;
+            }
+            .right-controls-group {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .filter-group {
+                width: 100%;
             }
             .switch-group {
                 flex-direction: column;
@@ -270,10 +318,13 @@
 <div class="score-board">স্কোর: <span id="live-score">0</span></div>
 
 <div class="container">
+    <!-- Top-Left Flush Button -->
+    <a href="index.html" class="btn-back">⬅️ হোম পেজে ফিরে যান</a>
+
     <h1 id="main-title">Custom Developing</h1>
     <h2 id="topic-title">টপিক লোড হচ্ছে...</h2>
     
-    <!-- Dynamic Category Path with Icon (Left Side) & Negative Marking Notice (Right Side) -->
+    <!-- Dynamic Category Path & Negative Marking Notice -->
     <div class="header-info-bar">
         <div id="category-path" class="exam-path"></div>
         <div class="negative-mark-note">[ প্রতিটি ভুল উত্তরের জন্য ০.৫ নম্বর কাটা যাবে ]</div>
@@ -281,22 +332,40 @@
     
     <hr style="margin-top: 8px; border: 0; border-top: 1px solid #ccc;">
 
-    <!-- Controls Bar: Back & Reset Buttons on Left, Switches on Right -->
+    <!-- Controls Bar -->
     <div class="controls-bar">
         <div class="nav-actions">
-            <a href="index.html" class="btn-back">⬅️ হোম পেজে ফিরে যান</a>
             <button class="btn-reset" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>
         </div>
 
-        <div class="switch-group">
-            <label class="switch-label">
-                <input type="checkbox" id="toggle-answer" checked>
-                সঠিক উত্তর দেখান
-            </label>
-            <label class="switch-label">
-                <input type="checkbox" id="toggle-explanation" checked>
-                ব্যাখ্যা দেখান
-            </label>
+        <!-- Right Group: Range Filter Dropdowns + Answer/Explanation Switches -->
+        <div class="right-controls-group">
+            <div class="filter-group">
+                <!-- Range Options Dropdown -->
+                <select id="range-select" class="select-dropdown" onchange="renderQuizUI()">
+                    <option value="all">সকল প্রশ্ন</option>
+                </select>
+                
+                <!-- Question Limit Options Dropdown -->
+                <select id="limit-select" class="select-dropdown" onchange="updateRangeOptions()">
+                    <option value="all">সকল প্রশ্ন</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+
+            <div class="switch-group">
+                <label class="switch-label">
+                    <input type="checkbox" id="toggle-answer" checked>
+                    সঠিক উত্তর দেখান
+                </label>
+                <label class="switch-label">
+                    <input type="checkbox" id="toggle-explanation" checked>
+                    ব্যাখ্যা দেখান
+                </label>
+            </div>
         </div>
     </div>
 
@@ -314,17 +383,15 @@
 </div>
 
 <script>
-    // URL Parameters থেকে Category সংগ্রহ করা
     const urlParams = new URLSearchParams(window.location.search);
     const currentCategory = urlParams.get('category');
 
-    // Render Live API URL
     const API_URL = currentCategory 
         ? `https://mosabber-quiz-app.onrender.com/api/questions?category=${encodeURIComponent(currentCategory)}`
         : null;
 
-    let quizData = [];
-    let answeredQuestions = {}; // উত্তর দেওয়া প্রশ্নগুলোর ট্র্যাক রাখার জন্য
+    let quizData = []; 
+    let answeredQuestions = {}; 
     let score = 0;
     let correctCount = 0;
     let incorrectCount = 0;
@@ -335,17 +402,16 @@
     const incorrectCountDisplay = document.getElementById('incorrect-count-display');
     const finalScoreDisplay = document.getElementById('final-score');
 
-    // Toggle Checkbox Elements
     const toggleAnswer = document.getElementById('toggle-answer');
     const toggleExplanation = document.getElementById('toggle-explanation');
+    const limitSelect = document.getElementById('limit-select');
+    const rangeSelect = document.getElementById('range-select');
 
-    // Bangla Choice Letter Mapping
     function getBanglaLetter(index) {
         const letters = ['ক', 'খ', 'গ', 'ঘ'];
         return letters[index] || index;
     }
 
-    // Dynamic Display Update Event Listeners
     toggleAnswer.addEventListener('change', updateVisibility);
     toggleExplanation.addEventListener('change', updateVisibility);
 
@@ -390,23 +456,64 @@
                 return;
             }
 
-            renderQuizUI();
+            updateRangeOptions();
         } catch (err) {
             console.error("Fetch error:", err);
             quizWrapper.innerHTML = "<p style='text-align:center; color:red;'>সার্ভার/ডাটাবেজ থেকে প্রশ্ন লোড করতে ব্যর্থ হয়েছে!</p>";
         }
     }
 
+    function updateRangeOptions() {
+        const limitValue = limitSelect.value;
+        rangeSelect.innerHTML = "";
+
+        if (limitValue === 'all' || quizData.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = 'all';
+            opt.innerText = (quizData.length > 0) ? `1-${quizData.length}` : `সকল প্রশ্ন`;
+            rangeSelect.appendChild(opt);
+        } else {
+            const chunkSize = parseInt(limitValue);
+            const totalQuestions = quizData.length;
+
+            for (let start = 0; start < totalQuestions; start += chunkSize) {
+                let end = Math.min(start + chunkSize, totalQuestions);
+                const opt = document.createElement('option');
+                opt.value = `${start}-${end}`;
+                opt.innerText = `${start + 1}-${end}`;
+                rangeSelect.appendChild(opt);
+            }
+        }
+
+        renderQuizUI();
+    }
+
     function renderQuizUI() {
         quizWrapper.innerHTML = "";
+        
+        let displayData = [];
+        let startIndexOffset = 0;
 
-        quizData.forEach((item, qIndex) => {
+        const selectedRange = rangeSelect.value;
+
+        if (selectedRange === 'all') {
+            displayData = quizData;
+            startIndexOffset = 0;
+        } else {
+            const [start, end] = selectedRange.split('-').map(Number);
+            displayData = quizData.slice(start, end);
+            startIndexOffset = start;
+        }
+
+        displayData.forEach((item, relativeIndex) => {
+            const actualIndex = startIndexOffset + relativeIndex;
+
             const qBlock = document.createElement('div');
             qBlock.className = 'question-block';
 
             const qText = document.createElement('div');
             qText.className = 'question-text';
-            qText.innerText = `${qIndex + 1}. ${item.q}`;
+            qText.innerText = `${actualIndex + 1}. ${item.q}`;
             qBlock.appendChild(qText);
 
             const optContainer = document.createElement('div');
@@ -417,7 +524,12 @@
                 btn.className = 'option-btn';
                 btn.innerText = `(${getBanglaLetter(oIndex)}) ${opt}`;
                 
-                btn.onclick = () => handleAnswer(btn, qIndex, oIndex, optContainer);
+                if (answeredQuestions[actualIndex]) {
+                    btn.classList.add('disabled');
+                } else {
+                    btn.onclick = () => handleAnswer(btn, actualIndex, oIndex, optContainer);
+                }
+
                 optContainer.appendChild(btn);
             });
 
@@ -426,7 +538,7 @@
             // Correct Answer Indicator
             const ansText = document.createElement('div');
             ansText.className = 'answer-text';
-            ansText.id = `ans-text-${qIndex}`;
+            ansText.id = `ans-text-${actualIndex}`;
             ansText.innerText = `সঠিক উত্তর: (${getBanglaLetter(item.ans)}) ${item.options[item.ans]}`;
             qBlock.appendChild(ansText);
 
@@ -434,13 +546,15 @@
             if (item.explanation && item.explanation.trim() !== '') {
                 const expText = document.createElement('div');
                 expText.className = 'explanation-text';
-                expText.id = `exp-text-${qIndex}`;
+                expText.id = `exp-text-${actualIndex}`;
                 expText.innerText = `ব্যাখ্যা: ${item.explanation}`;
                 qBlock.appendChild(expText);
             }
 
             quizWrapper.appendChild(qBlock);
         });
+
+        updateVisibility();
     }
 
     function handleAnswer(selectedBtn, qIndex, selectedIndex, optContainer) {
@@ -461,7 +575,7 @@
         } else {
             selectedBtn.classList.add('incorrect');
             if (correctBtn) correctBtn.classList.add('correct');
-            score -= 0.5; // Negative marking
+            score -= 0.5;
             incorrectCount += 1;
         }
 
@@ -475,7 +589,6 @@
         updateVisibility();
     }
 
-    // Reset Quiz Functionality
     function resetQuiz() {
         score = 0;
         correctCount = 0;
