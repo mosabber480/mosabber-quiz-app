@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile & Subscription - MCQ Platform</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .profile-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 500px;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .user-info p { margin: 8px 0; color: #555; font-size: 15px; }
+        .sub-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid #007bff;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .badge-active { background-color: #d4edda; color: #155724; }
+        .badge-expired { background-color: #f8d7da; color: #721c24; }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-quiz { background-color: #28a745; color: white; }
+        .btn-logout { background-color: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        <div class="profile-header">
+            <h2 style="margin:0; color:#333;">👤 User Profile</h2>
+            <span id="roleBadge" class="badge" style="background:#e0e0e0;">Customer</span>
+        </div>
+
+        <div class="user-info">
+            <p><strong>Full Name:</strong> <span id="userName">Loading...</span></p>
+            <p><strong>Email Address:</strong> <span id="userEmail">Loading...</span></p>
+        </div>
+
+        <div class="sub-box">
+            <h3 style="margin-top:0; color:#007bff; font-size:16px;">💳 Subscription Status</h3>
+            <p><strong>Current Plan:</strong> <span id="subPlan">None</span></p>
+            <p><strong>Status:</strong> <span id="subStatus" class="badge badge-expired">Checking...</span></p>
+            <p><strong>Expiration Date:</strong> <span id="subExpiry">N/A</span></p>
+        </div>
+
+        <div class="btn-group">
+            <a href="index.html" class="btn btn-quiz">📚 Start Practice / Quizzes</a>
+            <button class="btn btn-logout" onclick="logout()">🚪 Logout</button>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('quiz_user'));
+        const token = localStorage.getItem('quiz_token');
+
+        if (!token || !user) {
+            alert("Session expired. Please login again.");
+            window.location.href = 'login.html';
+        } else {
+            // Render basic details
+            document.getElementById('userName').innerText = user.name || 'N/A';
+            document.getElementById('userEmail').innerText = user.email || 'N/A';
+            document.getElementById('roleBadge').innerText = user.role ? user.role.toUpperCase() : 'CUSTOMER';
+
+            // Subscription check
+            const sub = user.subscription || {};
+            const isSubActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+
+            document.getElementById('subPlan').innerText = sub.plan ? sub.plan.replace('_', ' ').toUpperCase() : 'NO PLAN';
+            
+            const statusElem = document.getElementById('subStatus');
+            if (user.role === 'owner' || user.role === 'admin') {
+                statusElem.innerText = 'FULL ACCESS';
+                statusElem.className = 'badge badge-active';
+                document.getElementById('subExpiry').innerText = 'Lifetime Access';
+            } else if (isSubActive) {
+                statusElem.innerText = 'ACTIVE';
+                statusElem.className = 'badge badge-active';
+                document.getElementById('subExpiry').innerText = new Date(sub.endDate).toLocaleDateString();
+            } else {
+                statusElem.innerText = 'INACTIVE / EXPIRED';
+                statusElem.className = 'badge badge-expired';
+                document.getElementById('subExpiry').innerText = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('quiz_token');
+            localStorage.removeItem('quiz_user');
+            alert("Logged out successfully!");
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

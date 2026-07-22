@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment & User Management - Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 25px; 
+            background-color: #f4f7f6; 
+            max-width: 1600px; 
+            margin: 0 auto; 
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .btn-home {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .box { 
+            background: white; 
+            padding: 25px 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+        }
+
+        tr:hover { background-color: #f1f5f9; }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-active { background-color: #d4edda; color: #155724; }
+        .badge-expired { background-color: #f8d7da; color: #721c24; }
+        .badge-owner { background-color: #cce5ff; color: #004085; }
+
+        .plan-select {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 13px;
+        }
+
+        .btn-update {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            table { display: block; overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <div class="dashboard-header">
+        <h2 style="margin:0; color:#2c3e50;">💳 Payment & Subscription Management</h2>
+        <div style="display: flex; gap: 10px;">
+            <a href="dashboard.html" class="btn-home" style="background-color: #6c757d;">📝 MCQ Dashboard</a>
+            <a href="users.html" class="btn-home" style="background-color: #17a2b8;">💳 Payment & Users</a>
+            <a href="index.html" class="btn-home">🏠 হোম পেজ দেখুন</a>
+        </div>
+    </div>
+
+    <!-- User Table Section -->
+    <div class="box">
+        <h3>👥 Registered Users & Subscription Plans</h3>
+        <p style="color:#666; font-size:14px;">Select a plan for any customer and click <b>Update Plan</b> to activate their subscription access.</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Current Plan</th>
+                    <th>Validity Expiry Date</th>
+                    <th>Action (Set Plan)</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr><td colspan="8" style="text-align:center;">Loading users...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
+        const token = localStorage.getItem('quiz_token');
+
+        // Check if user is logged in and authorized
+        if (!token) {
+            alert("Unauthorized! Please login first.");
+            window.location.href = 'login.html';
+        }
+
+        async function loadUsers() {
+            const tableBody = document.getElementById('userTableBody');
+            try {
+                const res = await fetch(`${API_BASE}/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    tableBody.innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">${data.message || 'Failed to load users'}</td></tr>`;
+                    return;
+                }
+
+                if (data.users.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No users registered yet.</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = '';
+                data.users.forEach((u, index) => {
+                    const sub = u.subscription || {};
+                    const isActive = sub.active && sub.endDate && new Date(sub.endDate) > new Date();
+                    
+                    const statusBadge = u.role === 'owner' || u.role === 'admin' 
+                        ? `<span class="badge badge-owner">Admin/Owner</span>`
+                        : (isActive 
+                            ? `<span class="badge badge-active">Active</span>` 
+                            : `<span class="badge badge-expired">Expired / Inactive</span>`);
+
+                    const expiryDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString() : 'N/A';
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><b>${u.name}</b></td>
+                            <td>${u.email}</td>
+                            <td><small>${u.role}</small></td>
+                            <td>${statusBadge}</td>
+                            <td><b>${sub.plan || 'none'}</b></td>
+                            <td>${expiryDate}</td>
+                            <td>
+                                ${u.role === 'customer' ? `
+                                    <select class="plan-select" id="plan-${u._id}">
+                                        <option value="none" ${sub.plan === 'none' ? 'selected' : ''}>Cancel Plan</option>
+                                        <option value="1_month" ${sub.plan === '1_month' ? 'selected' : ''}>1 Month</option>
+                                        <option value="3_months" ${sub.plan === '3_months' ? 'selected' : ''}>3 Months</option>
+                                        <option value="6_months" ${sub.plan === '6_months' ? 'selected' : ''}>6 Months</option>
+                                        <option value="1_year" ${sub.plan === '1_year' ? 'selected' : ''}>1 Year</option>
+                                        <option value="2_years" ${sub.plan === '2_years' ? 'selected' : ''}>2 Years</option>
+                                    </select>
+                                    <button class="btn-update" onclick="updateSubscription('${u._id}')">Save Plan</button>
+                                ` : '<small style="color:#888;">Full Access</small>'}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Error fetching user list!</td></tr>`;
+            }
+        }
+
+        async function updateSubscription(userId) {
+            const selectedPlan = document.getElementById(`plan-${userId}`).value;
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/subscription`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ plan: selectedPlan })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ ${data.message}`);
+                    loadUsers();
+                } else {
+                    alert(`❌ Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert("❌ Error updating plan!");
+            }
+        }
+
+        window.onload = loadUsers;
+    </script>
+</body>
+</html>
