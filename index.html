@@ -1,98 +1,757 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Developing - Home</title>
+    <title>TopMCQ - সেরা অনলাইন কুইজ ও প্রস্তুতি প্ল্যাটফর্ম</title>
+    <!-- Font Awesome CDN for Modern Vector Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            padding: 40px 20px; 
-            background-color: #f4f7f6; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --secondary: #2ecc71;
+            --secondary-dark: #27ae60;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --accent: #ff9f43;
         }
-        .card { 
-            background: white; 
-            padding: 35px 30px; 
-            border-radius: 12px; 
-            max-width: 500px; 
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 1. Announcement Bar (No Animation Effect) */
+        .announcement-bar {
+            background: linear-gradient(90deg, #ff9f43, #ee5253);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 15px;
+            text-align: center;
+            position: relative;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        .announcement-text {
+            display: inline-block;
+        }
+
+        /* 2. Header Section */
+        header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo span {
+            color: var(--primary);
+        }
+        .logo-icon {
+            background: var(--primary);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 18px;
+        }
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+            align-items: center;
+        }
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 15px;
+            transition: color 0.2s ease;
+        }
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+        .btn-contact {
+            background-color: var(--primary);
+            color: white !important;
+            padding: 9px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-contact:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* 3. Hero Slider Section */
+        .slider-section {
+            position: relative;
+            max-width: 1200px;
+            margin: 25px auto 0 auto;
+            padding: 0 20px;
+            overflow: hidden;
+        }
+        .slider-wrapper {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+            min-height: 380px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        .slide {
+            display: none;
+            padding: 60px 50px;
+            color: white;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .slide.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide h1 {
+            font-size: 34px;
+            margin-bottom: 15px;
+            color: #ffffff;
+            font-weight: 800;
+        }
+        .slide p {
+            font-size: 18px;
+            color: #ecf0f1;
+            margin-bottom: 30px;
+            max-width: 700px;
+        }
+        .slide-btns {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn-main {
+            background-color: var(--secondary);
+            color: white;
+            text-decoration: none;
+            padding: 12px 26px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            transition: background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-main:hover {
+            background-color: var(--secondary-dark);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            text-decoration: none;
+            padding: 12px 26px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            border: 2px solid white;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            background-color: white;
+            color: var(--dark);
+        }
+        .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .dot.active {
+            background-color: #ffffff;
+            width: 28px;
+            border-radius: 10px;
+        }
+
+        /* Common Section Layout */
+        .section-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 28px;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: var(--gray);
+            font-size: 15px;
+            margin-bottom: 35px;
+        }
+
+        /* 4. Free Demo Quiz Section */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .demo-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .demo-badge {
+            background-color: #e3f2fd;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            width: fit-content;
+            margin-bottom: 12px;
+        }
+        .demo-card h3 {
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        .demo-card p {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .btn-demo {
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-demo:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* 5. Packages Section */
+        .package-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .package-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+        .package-card:hover {
+            transform: translateY(-5px);
+        }
+        .package-img {
             width: 100%;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+            height: 140px;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 48px;
+        }
+        .package-body {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .package-title {
+            font-size: 20px;
+            color: var(--dark);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .package-desc {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        .package-price {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--secondary-dark);
+            margin-bottom: 15px;
+        }
+        .package-price span {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: normal;
+        }
+        .btn-buy {
+            background-color: var(--dark);
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 15px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-buy:hover {
+            background-color: #1a252f;
+        }
+
+        /* 6. Mission & Goal Section */
+        .mission-section {
+            background-color: white;
+            padding: 50px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-top: 50px;
+        }
+        .mission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .mission-box {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            border-radius: 6px;
+        }
+        .mission-box h3 {
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mission-box h3 i {
+            color: var(--primary);
+        }
+        .mission-box p {
+            color: var(--gray);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* 7. Footer Section */
+        footer {
+            background-color: var(--dark);
+            color: #ecf0f1;
+            padding: 40px 20px 20px 20px;
+            margin-top: 60px;
+        }
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .footer-col h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #ffffff;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 6px;
+            display: inline-block;
+        }
+        .footer-col p, .footer-col ul li {
+            font-size: 14px;
+            color: #bdc3c7;
+            line-height: 1.8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .footer-col ul {
+            list-style: none;
+        }
+        .footer-col ul li a {
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer-col ul li a:hover {
+            color: #ffffff;
+        }
+        .footer-col i {
+            color: var(--primary);
+            width: 16px;
             text-align: center;
         }
-        h1 { color: #333; font-size: 26px; margin-bottom: 8px; }
-        p { color: #666; font-size: 14px; margin-bottom: 25px; }
-        
-        .cat-title { text-align: left; font-size: 16px; font-weight: bold; margin: 20px 0 10px; color: #444; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-        
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
-        a.topic-btn { 
-            display: block; 
-            padding: 12px; 
-            background: #007bff; 
-            color: white; 
-            text-decoration: none; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            font-size: 15px;
-            text-transform: capitalize;
-            transition: background 0.2s ease;
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #34495e;
+            font-size: 13px;
+            color: #95a5a6;
         }
-        a.topic-btn:hover { background: #0056b3; }
-        
-        a.btn-dashboard { 
-            background: #28a745; 
-            margin-top: 10px;
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .nav-menu {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .slide {
+                padding: 40px 25px;
+            }
+            .slide h1 {
+                font-size: 24px;
+            }
+            .slide p {
+                font-size: 15px;
+            }
         }
-        a.btn-dashboard:hover { background: #218838; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Custom Developing</h1>
-        <p>Quiz Practice & Management Portal</p>
-
-        <a href="dashboard.html" class="topic-btn btn-dashboard">⚙️ Open Admin Dashboard</a>
-
-        <div class="cat-title">Available Quiz Topics:</div>
-        <div class="btn-group" id="topicsList">
-            <p style="color:#888;">Loading topics...</p>
-        </div>
+    <!-- 1. Announcement Bar -->
+    <div class="announcement-bar">
+        <span class="announcement-text"><i class="fa-solid fa-bolt"></i> বিশেষ বিজ্ঞপ্তি: সার্ভার থেকে প্রথমবার কুইজের তথ্য লোড হতে ৩০ সেকেন্ড পর্যন্ত সময় লাগতে পারে। অনুগ্রহ করে ধৈর্য ধরুন!</span>
     </div>
 
+    <!-- 2. Header Section -->
+    <header>
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fa-solid fa-file-pen"></i></span> Top<span>MCQ</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> হোম</a></li>
+                <li><a href="All MCQ.html"><i class="fa-solid fa-layer-group"></i> সকল MCQ</a></li>
+                <li><a href="#packages"><i class="fa-solid fa-box-open"></i> প্যাকেজসমূহ</a></li>
+                <li><a href="#mission"><i class="fa-solid fa-bullseye"></i> আমাদের লক্ষ্য</a></li>
+                <li><a href="#contact" class="btn-contact"><i class="fa-solid fa-headset"></i> যোগাযোগ</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- 3. Hero Slider Section (4 Slides) -->
+    <section class="slider-section">
+        <div class="slider-wrapper">
+            <!-- Slide 1 -->
+            <div class="slide active">
+                <h1>বিসিএস ও ব্যাংক জব প্রস্তুতির সেরা মাধ্যম</h1>
+                <p>হাজারো সঠিক প্রশ্নের ব্যাখ্যাসহ নিজেকে যাচাই করুন এবং দ্রুততম সময়ে আপনার চাকরির প্রস্তুতি সম্পন্ন করুন।</p>
+                <div class="slide-btns">
+                    <a href="All MCQ.html" class="btn-main"><i class="fa-solid fa-rocket"></i> কুইজ শুরু করুন</a>
+                    <a href="#demo" class="btn-secondary"><i class="fa-solid fa-circle-play"></i> ফ্রি ডেমো দেখুন</a>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="slide">
+                <h1>লাইভ টাইমার ও পার্সোনালাইজড টেস্ট</h1>
+                <p>প্রতিটি প্রশ্নের জন্য নির্দিষ্ট সময় ও নেগেটিভ মার্কিং সহ রিয়েল এক্সাম হলের অভিজ্ঞতা লাভ করুন।</p>
+                <div class="slide-btns">
+                    <a href="All MCQ.html" class="btn-main"><i class="fa-solid fa-stopwatch"></i> টাইমার কুইজ দিন</a>
+                    <a href="#packages" class="btn-secondary"><i class="fa-solid fa-crown"></i> প্রিমিয়াম টেস্ট</a>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="slide">
+                <h1>টপিকভিত্তিক বিস্তৃত ব্যাখ্যামূলক সমাধান</h1>
+                <p>শুধু উত্তর নয়, প্রতিটি প্রশ্নের পেছনে বিস্তারিত ব্যাখ্যা পড়ে আপনার বেসিক মজবুত করুন।</p>
+                <div class="slide-btns">
+                    <a href="All MCQ.html" class="btn-main"><i class="fa-solid fa-book-open"></i> বিষয়ভিত্তিক কুইজ</a>
+                    <a href="#mission" class="btn-secondary"><i class="fa-solid fa-circle-info"></i> আমাদের সম্পর্কে</a>
+                </div>
+            </div>
+            <!-- Slide 4 -->
+            <div class="slide">
+                <h1>স্মার্ট ড্যাশবোর্ড ও ইনস্ট্যান্ট রেজাল্ট</h1>
+                <p>আপনার অগ্রগতি ট্র্যাক করুন, ভুল উত্তরগুলো চিহ্নিত করুন এবং নিজের দুর্বলতাগুলো দ্রুত কাটিয়ে উঠুন।</p>
+                <div class="slide-btns">
+                    <a href="All MCQ.html" class="btn-main"><i class="fa-solid fa-chart-line"></i> সকল কুইজ দেখুন</a>
+                    <a href="#contact" class="btn-secondary"><i class="fa-solid fa-phone"></i> হেল্পলাইন</a>
+                </div>
+            </div>
+
+            <!-- Dots Nav -->
+            <div class="slider-dots">
+                <span class="dot active" onclick="currentSlide(0)"></span>
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Free Demo Quiz Section -->
+    <section class="section-container" id="demo">
+        <h2 class="section-title">ফ্রি ডেমো কুইজ (Free Demo Quiz)</h2>
+        <p class="section-subtitle">কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন</p>
+        
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div>
+                    <span class="demo-badge">ফ্রি টেস্ট</span>
+                    <h3>বাংলা ভাষা ও সাহিত্য</h3>
+                    <p>সন্ধি, সমাস ও গুরুত্বপূর্ণ সাহিত্যিকদের প্রশ্নাবলি।</p>
+                </div>
+                <a href="quiz.html?category=prili/bangla/shondhi" class="btn-demo">কুইজ দিন <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="demo-card">
+                <div>
+                    <span class="demo-badge">ফ্রি টেস্ট</span>
+                    <h3>সাধারণ জ্ঞান (বাংলাদেশ)</h3>
+                    <p>মুক্তিযুদ্ধ, সংবিধান ও সাম্প্রতিক গুরুত্বপূর্ণ বিষয়াবলি।</p>
+                </div>
+                <a href="All MCQ.html" class="btn-demo">কুইজ দিন <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="demo-card">
+                <div>
+                    <span class="demo-badge">ফ্রি টেস্ট</span>
+                    <h3>General English</h3>
+                    <p>Grammar, Idioms, Vocabulary & Literature basics.</p>
+                </div>
+                <a href="All MCQ.html" class="btn-demo">কুইজ দিন <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="demo-card">
+                <div>
+                    <span class="demo-badge">ফ্রি টেস্ট</span>
+                    <h3>গাণিতিক যুক্তি ও মানসিক দক্ষতা</h3>
+                    <p>সহজ টেকনিক ও ব্যাখ্যাসহ গণিত অনুশীলন।</p>
+                </div>
+                <a href="All MCQ.html" class="btn-demo">কুইজ দিন <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Packages Section -->
+    <section class="section-container" id="packages">
+        <h2 class="section-title">আমাদের প্রিপারেশন প্যাকেজসমূহ</h2>
+        <p class="section-subtitle">আপনার প্রয়োজন অনুযায়ী সেরা প্যাকেজটি বেছে নিন</p>
+
+        <div class="package-grid">
+            <!-- Package 1 -->
+            <div class="package-card">
+                <div class="package-img"><i class="fa-solid fa-crosshairs"></i></div>
+                <div class="package-body">
+                    <h3 class="package-title">BCS Preliminary Special</h3>
+                    <p class="package-desc">বিসিএস প্রিলির সব বিষয়ের অধ্যায়ভিত্তিক কুইজ ও ১০,০০০+ ব্যাখ্যামূলক প্রশ্ন।</p>
+                    <div class="package-price">৳৪৯৯ <span>/ ৬ মাস</span></div>
+                    <a href="#contact" class="btn-buy"><i class="fa-solid fa-cart-shopping"></i> প্যাকেজটি কিনুন</a>
+                </div>
+            </div>
+
+            <!-- Package 2 -->
+            <div class="package-card">
+                <div class="package-img"><i class="fa-solid fa-building-columns"></i></div>
+                <div class="package-body">
+                    <h3 class="package-title">Bank Job Standard</h3>
+                    <p class="package-desc">সরকারি ও বেসরকারি ব্যাংক নিয়োগ পরীক্ষার জন্য বিশেষ ম্যাথ ও ইংলিশ সলিউশন।</p>
+                    <div class="package-price">৳৩৯৯ <span>/ ৬ মাস</span></div>
+                    <a href="#contact" class="btn-buy"><i class="fa-solid fa-cart-shopping"></i> প্যাকেজটি কিনুন</a>
+                </div>
+            </div>
+
+            <!-- Package 3 -->
+            <div class="package-card">
+                <div class="package-img"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="package-body">
+                    <h3 class="package-title">Primary & NTRCA Combo</h3>
+                    <p class="package-desc">প্রাথমিক শিক্ষক নিয়োগ ও শিক্ষক নিবন্ধন পরীক্ষার স্পেশাল মডেল টেস্ট।</p>
+                    <div class="package-price">৳২৯৯ <span>/ ৩ মাস</span></div>
+                    <a href="#contact" class="btn-buy"><i class="fa-solid fa-cart-shopping"></i> প্যাকেজটি কিনুন</a>
+                </div>
+            </div>
+
+            <!-- Package 4 -->
+            <div class="package-card">
+                <div class="package-img"><i class="fa-solid fa-gem"></i></div>
+                <div class="package-body">
+                    <h3 class="package-title">All-in-One Lifetime Access</h3>
+                    <p class="package-desc">প্ল্যাটফর্মের সকল বর্তমান ও ভবিষ্যৎ কুইজ প্যাকেজে আজীবন এক্সেস।</p>
+                    <div class="package-price">৳৯৯৯ <span>/ লাইফটাইম</span></div>
+                    <a href="#contact" class="btn-buy"><i class="fa-solid fa-cart-shopping"></i> প্যাকেজটি কিনুন</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. Mission & Goal Section -->
+    <section class="section-container">
+        <div class="mission-section" id="mission">
+            <h2 class="section-title">আমাদের মিশন ও লক্ষ্য</h2>
+            <p class="section-subtitle">শিক্ষার্থীদের সফলতা ও সঠিক প্রস্তুতির পথ সুগম করাই আমাদের উদ্দেশ্য</p>
+
+            <div class="mission-grid">
+                <div class="mission-box">
+                    <h3><i class="fa-solid fa-bullseye"></i> আমাদের মিশন (Mission)</h3>
+                    <p>বাংলাদেশের যেকোনো প্রান্তের শিক্ষার্থীদের কাছে মানসম্মত ও তথ্যসমৃদ্ধ প্রস্তুতিমূলক কুইজ পৌঁছে দেওয়া, যাতে তারা ঘরে বসেই রিয়েল-টাইম মূল্যায়নের মাধ্যমে নিজের আত্মবিশ্বাস বৃদ্ধি করতে পারে।</p>
+                </div>
+
+                <div class="mission-box">
+                    <h3><i class="fa-solid fa-rocket"></i> আমাদের লক্ষ্য (Goal)</h3>
+                    <p>একটি আধুনিক, সহজ ও কার্যকর লার্নিং প্ল্যাটফর্ম হিসেবে প্রতিটি প্রতিযোগিতামূলক পরীক্ষার পরীক্ষার্থীর প্রথম পছন্দ হয়ে ওঠা এবং ব্যাখ্যামূলক অনুশীলনের মাধ্যমে তাদের শতভাগ সাফল্য নিশ্চিত করা।</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Footer Section -->
+    <footer id="contact">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h4>TopMCQ সম্পর্কে</h4>
+                <p>TopMCQ হলো একটি বিশ্বস্ত অনলাইন কুইজ প্ল্যাটফর্ম, যেখানে বিসিএস, ব্যাংক, প্রাইমারি সহ সকল চাকরির প্রস্তুতি সহজ ও ব্যাখ্যামূলকভাবে নিশ্চিত করা হয়।</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>দ্রুত লিংক</h4>
+                <ul>
+                    <li><a href="index.html"><i class="fa-solid fa-angle-right"></i> হোম পেজ</a></li>
+                    <li><a href="All MCQ.html"><i class="fa-solid fa-angle-right"></i> সকল MCQ</a></li>
+                    <li><a href="#packages"><i class="fa-solid fa-angle-right"></i> প্যাকেজসমূহ</a></li>
+                    <li><a href="#mission"><i class="fa-solid fa-angle-right"></i> আমাদের মিশন</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>ক্যাটাগরি</h4>
+                <ul>
+                    <li><a href="All MCQ.html"><i class="fa-solid fa-angle-right"></i> বিসিএস প্রিলি</a></li>
+                    <li><a href="All MCQ.html"><i class="fa-solid fa-angle-right"></i> ব্যাংক জব</a></li>
+                    <li><a href="All MCQ.html"><i class="fa-solid fa-angle-right"></i> শিক্ষক নিবন্ধন</a></li>
+                    <li><a href="All MCQ.html"><i class="fa-solid fa-angle-right"></i> সাধারণ জ্ঞান</a></li>
+                </ul>
+            </div>
+
+            <!-- Footer Contact Info with Font Awesome Icons -->
+            <div class="footer-col">
+                <h4>যোগাযোগ</h4>
+                <p><i class="fa-solid fa-envelope"></i> ইমেইল: support@topmcq.com</p>
+                <p><i class="fa-solid fa-phone"></i> হেল্পলাইন: +880 1700-000000</p>
+                <p><i class="fa-solid fa-location-dot"></i> ঢাকা, বাংলাদেশ</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 TopMCQ. সর্বস্বত্ব সংরক্ষিত।</p>
+        </div>
+    </footer>
+
+    <!-- Slider JS Logic -->
     <script>
-        const CAT_API_URL = 'https://mosabber-quiz-app.onrender.com/api/categories';
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
 
-        async function loadTopics() {
-            const container = document.getElementById('topicsList');
-            try {
-                const res = await fetch(CAT_API_URL);
-                const categories = await res.json();
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
 
-                if (categories.length === 0) {
-                    container.innerHTML = "<p style='color:#888;'>No active topics yet. Create one from Dashboard!</p>";
-                    return;
-                }
+            slideIndex = index;
+            if (slideIndex >= slides.length) slideIndex = 0;
+            if (slideIndex < 0) slideIndex = slides.length - 1;
 
-                container.innerHTML = "";
-                categories.forEach(cat => {
-                    const a = document.createElement('a');
-                    a.className = 'topic-btn';
-                    a.href = `quiz.html?category=${encodeURIComponent(cat)}`;
-                    a.innerText = `📖 ${cat}`;
-                    container.appendChild(a);
-                });
-            } catch (err) {
-                container.innerHTML = "<p style='color:red;'>Failed to load topics.</p>";
-            }
+            slides[slideIndex].classList.add('active');
+            dots[slideIndex].classList.add('active');
         }
 
-        window.onload = loadTopics;
+        function currentSlide(index) {
+            showSlide(index);
+        }
+
+        // Automatic Slide Transition
+        setInterval(() => {
+            showSlide(slideIndex + 1);
+        }, 5000);
     </script>
 </body>
 </html>
