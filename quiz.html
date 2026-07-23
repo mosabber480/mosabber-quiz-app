@@ -234,6 +234,7 @@
             display: inline-flex;
             align-items: center;
             gap: 3px;
+            margin-left: 2px;
         }
         .dot-red {
             width: 9px;
@@ -517,7 +518,7 @@
 
             <!-- Toggle Switches (Color, Correct Ans, Explanation, Time) -->
             <div class="switch-group">
-                <!-- Red-Green Color Feedback Switch -->
+                <!-- 🔴🟢 Red-Green Color Feedback Switch (DEFAULT: checked) -->
                 <label class="switch-label">
                     <label class="switch">
                         <input type="checkbox" id="toggle-color" checked>
@@ -531,12 +532,13 @@
 
                 <label class="switch-label">
                     <label class="switch">
-                        <input type="checkbox" id="toggle-answer" checked>
+                        <input type="checkbox" id="toggle-answer">
                         <span class="slider"></span>
                     </label>
                     সঠিক উত্তর
                 </label>
 
+                <!-- 📖 Explanation Switch (DEFAULT: checked) -->
                 <label class="switch-label">
                     <label class="switch">
                         <input type="checkbox" id="toggle-explanation" checked>
@@ -547,7 +549,7 @@
 
                 <label class="switch-label">
                     <label class="switch">
-                        <input type="checkbox" id="toggle-time" checked>
+                        <input type="checkbox" id="toggle-time">
                         <span class="slider"></span>
                     </label>
                     সময়
