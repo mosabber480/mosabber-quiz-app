@@ -1,14 +1,16 @@
+require('dotenv').config(); // .env ফাইল থেকে MONGO_URI পড়ার জন্য
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const User = require('./models/User');
+const User = require('./models/User'); // আপনার User Model পাথ
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:password@cluster0.mongodb.net/quizdb';
+// .env থেকে URI নিবে, না পেলে হার্ডকোডেড ফলব্যাক ব্যবহার করবে
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://mosabber480_db_user:lKwH9F8nO2BzxpKx@mosabber.3ajdj0u.mongodb.net/quizDB?retryWrites=true&w=majority';
 
 const initialUsers = [
     {
         name: 'Main Owner',
-        email: 'owner@example.com',      // আপনার Owner Email দিন
-        password: 'ownerpassword123',     // আপনার Owner Password দিন
+        email: 'owner@example.com',      // আপনার আসল Owner Email দিন
+        password: 'ownerpassword123',     // আপনার সুরক্ষিত Owner Password দিন
         role: 'owner'
     },
     {
@@ -28,17 +30,19 @@ const initialUsers = [
 async function seedSystemUsers() {
     try {
         await mongoose.connect(MONGO_URI);
-        console.log('✅ Connected to MongoDB...');
+        console.log('✅ Connected to MongoDB Atlas...');
 
         for (const userData of initialUsers) {
             let existingUser = await User.findOne({ email: userData.email });
 
             if (existingUser) {
+                // ইউজার থাকলে তথ্য ও পাসওয়ার্ড আপডেট
                 existingUser.role = userData.role;
                 existingUser.password = await bcrypt.hash(userData.password, 10);
                 await existingUser.save();
-                console.log(`🔄 Updated user: ${userData.email} (${userData.role})`);
+                console.log(`🔄 Updated existing user: ${userData.email} (${userData.role})`);
             } else {
+                // নতুন ইউজার তৈরি
                 const hashedPassword = await bcrypt.hash(userData.password, 10);
                 const newUser = new User({
                     name: userData.name,
@@ -47,14 +51,16 @@ async function seedSystemUsers() {
                     role: userData.role
                 });
                 await newUser.save();
-                console.log(`✨ Created user: ${userData.email} (${userData.role})`);
+                console.log(`✨ Created new user: ${userData.email} (${userData.role})`);
             }
         }
 
-        console.log('🎉 Owner & Admin account setup completed!');
-        mongoose.connection.close();
+        console.log('🎉 Owner & Admin account setup completed successfully!');
     } catch (err) {
         console.error('❌ Error seeding users:', err);
+    } finally {
+        await mongoose.connection.close();
+        console.log('🔌 Database connection closed.');
     }
 }
 
