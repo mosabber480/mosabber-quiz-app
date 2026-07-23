@@ -4,10 +4,11 @@ const cors = require('cors');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
-// Authentication & Authorization Middlewares and Models
+// Environment Config & Middlewares
+require('dotenv').config();
 const User = require('./models/User');
 const authRoutes = require('./routes/auth');
-const { verifyToken, authorizeRoles, checkSubscription } = require('./middleware/authMiddleware');
+const { verifyToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -30,7 +31,7 @@ const questionSchema = new mongoose.Schema({
     options: { type: [String], required: true },
     ans: { type: Number, required: true },
     explanation: { type: String, default: '' },
-    category: { type: String, required: true }
+    category: { type: String, required: true, index: true } // Fast Search Indexing
 }, { timestamps: true });
 
 const Question = mongoose.model('Question', questionSchema);
@@ -62,10 +63,9 @@ app.put('/api/auth/change-password', verifyToken, async (req, res) => {
     }
 });
 
-
 // ------------------- USER & SUBSCRIPTION MANAGEMENT (Owner/Admin) -------------------
 
-// 1. Get All Users (Only Owner and Admin can see)
+// Get All Users (Owner and Admin only)
 app.get('/api/users', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
         const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -75,10 +75,10 @@ app.get('/api/users', verifyToken, authorizeRoles('owner', 'admin'), async (req,
     }
 });
 
-// 2. Update Subscription Plan for Customer (Owner and Admin only)
+// Update Subscription Plan (Owner and Admin only)
 app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
-        const { plan } = req.body; // '1_month', '3_months', '6_months', '1_year', '2_years', 'none'
+        const { plan } = req.body;
         const user = await User.findById(req.params.userId);
 
         if (!user) {
@@ -88,7 +88,6 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
         let startDate = new Date();
         let endDate = new Date();
 
-        // Calculate Plan Duration
         if (plan === '1_month') endDate.setMonth(endDate.getMonth() + 1);
         else if (plan === '3_months') endDate.setMonth(endDate.getMonth() + 3);
         else if (plan === '6_months') endDate.setMonth(endDate.getMonth() + 6);
@@ -119,7 +118,7 @@ app.put('/api/users/:userId/subscription', verifyToken, authorizeRoles('owner', 
     }
 });
 
-// 3. Create New Admin (Only Owner)
+// Create New Admin (Only Owner)
 app.post('/api/users/create-admin', verifyToken, authorizeRoles('owner'), async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -144,7 +143,7 @@ app.post('/api/users/create-admin', verifyToken, authorizeRoles('owner'), async 
     }
 });
 
-// 4. Delete User/Admin (Only Owner)
+// Delete User/Admin (Only Owner)
 app.delete('/api/users/:userId', verifyToken, authorizeRoles('owner'), async (req, res) => {
     try {
         const targetUser = await User.findById(req.params.userId);
@@ -163,11 +162,10 @@ app.delete('/api/users/:userId', verifyToken, authorizeRoles('owner'), async (re
     }
 });
 
-
 // ------------------- QUESTION API ENDPOINTS -------------------
 
-// 1. Get Questions (Filtered by Category if provided) - Subscription Protected for Customers
-app.get('/api/questions', verifyToken, checkSubscription, async (req, res) => {
+// 1. Get Questions (Publicly Accessible - Smooth Quiz Experience)
+app.get('/api/questions', async (req, res) => {
     try {
         const { category } = req.query;
         let filter = {};
@@ -237,7 +235,7 @@ app.get('/api/categories', async (req, res) => {
     }
 });
 
-// 7. Robust Bulk Upload CSV (Owner & Admin only)
+// 7. Bulk Upload CSV (Owner & Admin only)
 app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admin'), upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
@@ -249,7 +247,6 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
             return res.status(400).json({ success: false, error: 'Category path is required' });
         }
 
-        // CSV File Text Extract
         const fileContent = req.file.buffer.toString('utf-8');
         const lines = fileContent.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
 
@@ -257,24 +254,33 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
             return res.status(400).json({ success: false, error: 'CSV file must have header and at least one data row.' });
         }
 
-        // Native CSV Row Splitter Function (Quotes Safe)
         const parseCSVLine = (text) => {
-            const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|)/g;
-            const values = [];
-            let match;
-            while ((match = regex.exec(text)) !== null) {
-                if (match.index === regex.lastIndex) regex.lastIndex++;
-                let val = match[1] || '';
-                if (val.startsWith('"') && val.endsWith('"')) {
-                    val = val.substring(1, val.length - 1).replace(/""/g, '"');
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        current += '"';
+                        i++; 
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
                 }
-                values.push(val.trim());
             }
-            if (values.length > 0 && values[values.length - 1] === '') values.pop();
-            return values;
+            result.push(current.trim());
+            return result;
         };
 
-        // Header Check
         const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
 
         let qIdx = headers.findIndex(h => h === 'question' || h === 'q');
@@ -285,7 +291,6 @@ app.post('/api/questions/upload-csv', verifyToken, authorizeRoles('owner', 'admi
         let ansIdx = headers.findIndex(h => h === 'ans' || h === 'answer');
         let expIdx = headers.findIndex(h => h === 'explanation');
 
-        // Defaults if headers missed
         if (qIdx === -1) qIdx = 0;
         if (opt0Idx === -1) opt0Idx = 1;
         if (opt1Idx === -1) opt1Idx = 2;
