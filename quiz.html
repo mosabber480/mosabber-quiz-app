@@ -68,18 +68,41 @@
             background-color: #27ae60;
         }
 
-        .score-board {
+        /* Floating Status Bar (Timer & Score) */
+        .floating-status-bar {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #2ecc71;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .timer-board {
+            background: #e74c3c;
             color: white;
-            padding: 15px 20px;
+            padding: 10px 16px;
             border-radius: 8px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            z-index: 1000;
+            min-width: 90px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .score-board {
+            background: #2ecc71;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            min-width: 90px;
+            text-align: center;
         }
 
         .header-info-bar {
@@ -147,24 +170,141 @@
             border-color: #007bff;
         }
 
+        /* Toggle Switch Styles */
         .switch-group {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
         .switch-label {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             font-size: 13px;
             font-weight: 600;
             color: #2c3e50;
             cursor: pointer;
+            user-select: none;
         }
-        .switch-label input {
-            width: 15px;
-            height: 15px;
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
             cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+
+        /* Red-Green Color Circles Indicator */
+        .color-dots-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .dot-red {
+            width: 9px;
+            height: 9px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+        }
+        .dot-green {
+            width: 9px;
+            height: 9px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+        }
+
+        /* Bottom-Right Corner Popup Toast Styling */
+        .corner-popup {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #ffffff;
+            color: #2c3e50;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            border-left: 5px solid #007bff;
+            z-index: 2000;
+            display: none;
+            max-width: 320px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .corner-popup.warning {
+            border-left-color: #f39c12;
+        }
+
+        .corner-popup.danger {
+            border-left-color: #e74c3c;
+        }
+
+        .corner-popup h4 {
+            margin: 0 0 6px 0;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+
+        .corner-popup p {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .popup-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .popup-btn:hover {
+            background-color: #0056b3;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .question-block {
@@ -195,55 +335,7 @@
             font-size: 15px;
             text-align: left;
             transition: all 0.2s ease;
-        }
-        
-        @media (max-width: 768px) {
-            body { padding: 15px; }
-            .container { padding: 20px; }
-            h1, h2 { font-size: 20px; }
-            .score-board {
-                top: 10px;
-                right: 10px;
-                padding: 10px 15px;
-                font-size: 15px;
-            }
-            .header-info-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-            .negative-mark-note { text-align: left; }
-            .controls-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            .nav-actions {
-                width: 100%;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-            .right-controls-group {
-                width: 100%;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            .filter-group { width: 100%; }
-            .switch-group {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            .options-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .option-btn {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 12px 15px;
-            }
+            font-weight: normal;
         }
 
         .option-btn:hover:not(.disabled) {
@@ -251,6 +343,8 @@
             border-color: #dae0e5;
         }
         .option-btn.disabled { cursor: not-allowed; }
+
+        /* Color Feedback Classes */
         .correct {
             background-color: #2ecc71 !important;
             color: white !important;
@@ -261,6 +355,15 @@
             color: white !important;
             border-color: #c0392b !important;
         }
+        
+        /* 🎨 Neutral Selected State when Color Switch is OFF */
+        .neutral-selected {
+            background-color: #ecf7fa !important;
+            color: #000000 !important;
+            border-color: #222 !important;
+            font-weight: normal !important;
+        }
+
         .answer-text {
             font-weight: bold;
             color: #27ae60;
@@ -300,11 +403,84 @@
             padding-top: 10px;
             display: inline-block;
         }
+
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 20px; }
+            h1, h2 { font-size: 20px; }
+            
+            .floating-status-bar {
+                top: 10px;
+                right: 10px;
+                gap: 6px;
+            }
+            .timer-board, .score-board {
+                padding: 6px 12px;
+                font-size: 14px;
+                min-width: 80px;
+            }
+
+            .header-info-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .negative-mark-note { text-align: left; }
+            .controls-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .nav-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            .right-controls-group {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .filter-group { width: 100%; }
+            .switch-group {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 10px;
+            }
+            .options-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .option-btn {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 12px 15px;
+            }
+            .corner-popup {
+                bottom: 15px;
+                right: 15px;
+                left: 15px;
+                max-width: none;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="score-board">স্কোর: <span id="live-score">0</span></div>
+<!-- Floating Status Container (Timer & Score) -->
+<div class="floating-status-bar">
+    <div class="timer-board" id="timer-board-box"><span id="timer-display">00:00</span></div>
+    <div class="score-board">স্কোর: <span id="live-score">0</span></div>
+</div>
+
+<!-- Bottom Right Corner Toast Popup -->
+<div id="corner-popup" class="corner-popup">
+    <h4 id="popup-title">বিজ্ঞপ্তি</h4>
+    <p id="popup-msg"></p>
+    <div id="popup-action"></div>
+</div>
 
 <div class="container">
     <a href="index.html" class="btn-back">⬅️ হোম পেজে ফিরে যান</a>
@@ -339,14 +515,42 @@
                 </select>
             </div>
 
+            <!-- Toggle Switches (Color, Correct Ans, Explanation, Time) -->
             <div class="switch-group">
+                <!-- Red-Green Color Feedback Switch -->
                 <label class="switch-label">
-                    <input type="checkbox" id="toggle-answer" checked>
-                    সঠিক উত্তর দেখান
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-color" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="color-dots-icon">
+                        <span class="dot-red"></span>
+                        <span class="dot-green"></span>
+                    </span>
                 </label>
+
                 <label class="switch-label">
-                    <input type="checkbox" id="toggle-explanation" checked>
-                    ব্যাখ্যা দেখান
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-answer" checked>
+                        <span class="slider"></span>
+                    </label>
+                    সঠিক উত্তর
+                </label>
+
+                <label class="switch-label">
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-explanation" checked>
+                        <span class="slider"></span>
+                    </label>
+                    ব্যাখ্যা
+                </label>
+
+                <label class="switch-label">
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-time" checked>
+                        <span class="slider"></span>
+                    </label>
+                    সময়
                 </label>
             </div>
         </div>
@@ -374,21 +578,37 @@
         : null;
 
     let quizData = []; 
-    let answeredQuestions = {}; 
+    let answeredQuestions = {}; // Stores: { qIndex: selectedIndex }
     let score = 0;
     let correctCount = 0;
     let incorrectCount = 0;
 
+    // Timer Variables
+    let timerInterval = null;
+    let initialTotalSeconds = 0;
+    let totalSecondsLeft = 0;
+    let warningTriggered = false;
+
     const quizWrapper = document.getElementById('quiz-wrapper');
     const liveScoreDisplay = document.getElementById('live-score');
+    const timerDisplay = document.getElementById('timer-display');
+    const timerBoardBox = document.getElementById('timer-board-box');
     const correctCountDisplay = document.getElementById('correct-count-display');
     const incorrectCountDisplay = document.getElementById('incorrect-count-display');
     const finalScoreDisplay = document.getElementById('final-score');
 
+    const toggleColor = document.getElementById('toggle-color');
     const toggleAnswer = document.getElementById('toggle-answer');
     const toggleExplanation = document.getElementById('toggle-explanation');
+    const toggleTime = document.getElementById('toggle-time');
     const limitSelect = document.getElementById('limit-select');
     const rangeSelect = document.getElementById('range-select');
+
+    // Popup Elements
+    const cornerPopup = document.getElementById('corner-popup');
+    const popupTitle = document.getElementById('popup-title');
+    const popupMsg = document.getElementById('popup-msg');
+    const popupAction = document.getElementById('popup-action');
 
     function getBanglaLetter(index) {
         const letters = ['ক', 'খ', 'গ', 'ঘ'];
@@ -397,6 +617,13 @@
 
     toggleAnswer.addEventListener('change', updateVisibility);
     toggleExplanation.addEventListener('change', updateVisibility);
+    
+    // কালার সুইচে টগল করলে অপশন রঙ ডাইনামিকলি সিঙ্ক হবে
+    toggleColor.addEventListener('change', updateOptionColors);
+
+    toggleTime.addEventListener('change', () => {
+        resetQuiz();
+    });
 
     function updateVisibility() {
         Object.keys(answeredQuestions).forEach(qIndex => {
@@ -408,6 +635,38 @@
             const expElem = document.getElementById(`exp-text-${qIndex}`);
             if (expElem) {
                 expElem.style.display = toggleExplanation.checked ? 'block' : 'none';
+            }
+        });
+    }
+
+    // রিয়েল-টাইম অপশন কালার সিঙ্ক করার ফাংশন
+    function updateOptionColors() {
+        Object.keys(answeredQuestions).forEach(qIndex => {
+            const selectedIndex = answeredQuestions[qIndex];
+            const currentQuestion = quizData[qIndex];
+            const qBlock = document.getElementById(`q-block-${qIndex}`);
+
+            if (!qBlock || !currentQuestion) return;
+
+            const allButtons = qBlock.querySelectorAll('.option-btn');
+            const selectedBtn = allButtons[selectedIndex];
+            const correctBtn = allButtons[currentQuestion.ans];
+
+            // আগে দেওয়া কালার ক্লাসগুলো ক্লিয়ার করা
+            allButtons.forEach(btn => {
+                btn.classList.remove('correct', 'incorrect', 'neutral-selected');
+            });
+
+            if (toggleColor.checked) {
+                if (selectedIndex === currentQuestion.ans) {
+                    if (selectedBtn) selectedBtn.classList.add('correct');
+                } else {
+                    if (selectedBtn) selectedBtn.classList.add('incorrect');
+                    if (correctBtn) correctBtn.classList.add('correct');
+                }
+            } else {
+                // কালার সুইচ OFF থাকলে .neutral-selected ব্যবহার হবে
+                if (selectedBtn) selectedBtn.classList.add('neutral-selected');
             }
         });
     }
@@ -485,6 +744,7 @@
 
     function renderQuizUI() {
         quizWrapper.innerHTML = "";
+        hidePopup();
         
         if (!Array.isArray(quizData) || quizData.length === 0) {
             return;
@@ -504,11 +764,20 @@
             startIndexOffset = start;
         }
 
+        if (toggleTime.checked) {
+            timerBoardBox.style.display = "block";
+            startTimer(displayData.length);
+        } else {
+            timerBoardBox.style.display = "none";
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
         displayData.forEach((item, relativeIndex) => {
             const actualIndex = startIndexOffset + relativeIndex;
 
             const qBlock = document.createElement('div');
             qBlock.className = 'question-block';
+            qBlock.id = `q-block-${actualIndex}`;
 
             const qText = document.createElement('div');
             qText.className = 'question-text';
@@ -523,7 +792,7 @@
                 btn.className = 'option-btn';
                 btn.innerText = `(${getBanglaLetter(oIndex)}) ${opt}`;
                 
-                if (answeredQuestions[actualIndex]) {
+                if (answeredQuestions[actualIndex] !== undefined) {
                     btn.classList.add('disabled');
                 } else {
                     btn.onclick = () => handleAnswer(btn, actualIndex, oIndex, optContainer);
@@ -552,9 +821,98 @@
         });
 
         updateVisibility();
+        updateOptionColors();
+    }
+
+    // TIMER LOGIC
+    function startTimer(questionCount) {
+        if (timerInterval) clearInterval(timerInterval);
+
+        initialTotalSeconds = questionCount * 36;
+        totalSecondsLeft = initialTotalSeconds;
+        warningTriggered = false;
+
+        updateTimerDisplay();
+
+        const warningThreshold = Math.floor(initialTotalSeconds * 0.10);
+
+        timerInterval = setInterval(() => {
+            if (!toggleTime.checked) {
+                clearInterval(timerInterval);
+                return;
+            }
+
+            if (totalSecondsLeft <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.innerText = "00:00";
+                handleTimeOut();
+            } else {
+                totalSecondsLeft--;
+                updateTimerDisplay();
+
+                if (warningThreshold > 0 && totalSecondsLeft <= warningThreshold && !warningTriggered) {
+                    warningTriggered = true;
+                    show10PercentWarningPopup();
+                }
+            }
+        }, 1000);
+    }
+
+    function formatTime(totalSec) {
+        const minutes = Math.floor(totalSec / 60);
+        const seconds = totalSec % 60;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+        return { formattedMinutes, formattedSeconds, minutes, seconds };
+    }
+
+    function updateTimerDisplay() {
+        const { formattedMinutes, formattedSeconds } = formatTime(totalSecondsLeft);
+        timerDisplay.innerText = `${formattedMinutes}:${formattedSeconds}`;
+    }
+
+    // POPUP DISPLAY FUNCTIONS
+    function show10PercentWarningPopup() {
+        if (!toggleTime.checked) return;
+
+        const { minutes, seconds } = formatTime(totalSecondsLeft);
+        let timeStr = "";
+        if (minutes > 0) timeStr += `${minutes} মিনিট `;
+        if (seconds > 0) timeStr += `${seconds} সেকেন্ড`;
+
+        cornerPopup.className = "corner-popup warning";
+        popupTitle.innerText = "⚠️ সময় প্রায় শেষ!";
+        popupMsg.innerText = `আর মাত্র ${timeStr} বাকি আছে। দ্রুত উত্তর দিন!`;
+        popupAction.innerHTML = `<button class="popup-btn" onclick="hidePopup()">ঠিক আছে</button>`;
+        cornerPopup.style.display = "block";
+    }
+
+    function handleTimeOut() {
+        if (!toggleTime.checked) return;
+
+        disableAllButtonsOnTimeOut();
+        cornerPopup.className = "corner-popup danger";
+        popupTitle.innerText = "⏰ সময় শেষ!";
+        popupMsg.innerText = `আপনার নির্ধারিত সময় শেষ হয়ে গেছে। আপনার প্রাপ্ত স্কোর হলো: ${score}`;
+        popupAction.innerHTML = `<button class="popup-btn" onclick="resetQuiz()">🔄 পুনরায় শুরু করুন</button>`;
+        cornerPopup.style.display = "block";
+    }
+
+    function hidePopup() {
+        cornerPopup.style.display = "none";
+    }
+
+    function disableAllButtonsOnTimeOut() {
+        const allOptionBtns = document.querySelectorAll('.option-btn');
+        allOptionBtns.forEach(btn => {
+            btn.classList.add('disabled');
+            btn.onclick = null;
+        });
     }
 
     function handleAnswer(selectedBtn, qIndex, selectedIndex, optContainer) {
+        if (toggleTime.checked && totalSecondsLeft <= 0) return;
+
         const currentQuestion = quizData[qIndex];
         const allButtons = optContainer.querySelectorAll('.option-btn');
         
@@ -563,20 +921,20 @@
             btn.onclick = null;
         });
 
-        const correctBtn = allButtons[currentQuestion.ans];
+        // ইউজারের উত্তর সংরক্ষণ
+        answeredQuestions[qIndex] = selectedIndex;
 
+        // কালার আপডেট রেন্ডার করা
+        updateOptionColors();
+
+        // স্কোর ক্যালকুলেশন
         if (selectedIndex === currentQuestion.ans) {
-            selectedBtn.classList.add('correct');
             score += 1;
             correctCount += 1;
         } else {
-            selectedBtn.classList.add('incorrect');
-            if (correctBtn) correctBtn.classList.add('correct');
             score -= 0.5;
             incorrectCount += 1;
         }
-
-        answeredQuestions[qIndex] = true;
 
         liveScoreDisplay.innerText = score;
         correctCountDisplay.innerText = correctCount;
@@ -597,6 +955,7 @@
         incorrectCountDisplay.innerText = 0;
         finalScoreDisplay.innerText = 'আপনার মোট প্রাপ্ত স্কোর: ০';
 
+        hidePopup();
         renderQuizUI();
     }
 
