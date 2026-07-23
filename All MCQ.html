@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All MCQ - Browse Categories</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .btn-home {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-bottom-right-radius: 6px;
+            border-top-left-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        .btn-home:hover {
+            background-color: #0056b3;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+        .category-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            background: #fff;
+            overflow: hidden;
+        }
+        .category-header {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .subcategory-list {
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .subcategory-btn {
+            background-color: #e2e6ea;
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .subcategory-btn:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .loading-text {
+            text-align: center;
+            color: #888;
+            font-size: 16px;
+            padding: 30px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="btn-home">⬅️ হোম পেজ</a>
+
+    <h1>সকল কুইজ ক্যাটাগরি (All MCQ)</h1>
+
+    <div id="category-wrapper">
+        <p class="loading-text">ক্যাটাগরি ডাটা লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'https://mosabber-quiz-app.onrender.com/api/questions';
+
+    async function fetchCategories() {
+        const wrapper = document.getElementById('category-wrapper');
+
+        try {
+            const token = localStorage.getItem('token') || '';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const res = await fetch(API_URL, { method: 'GET', headers: headers });
+            const data = await res.json();
+
+            if (!res.ok || !Array.isArray(data)) {
+                throw new Error("Failed to fetch questions");
+            }
+
+            // ক্যাটাগরি গ্রুপিং করা
+            const groupedCategories = {};
+
+            data.forEach(item => {
+                if (!item.category) return;
+                
+                const parts = item.category.split('/');
+                const mainCat = parts[0]?.trim() || 'অন্যান্য';
+                const subCat = parts[1]?.trim() || parts[0]?.trim();
+
+                if (!groupedCategories[mainCat]) {
+                    groupedCategories[mainCat] = new Set();
+                }
+                groupedCategories[mainCat].add(subCat);
+            });
+
+            wrapper.innerHTML = "";
+
+            if (Object.keys(groupedCategories).length === 0) {
+                wrapper.innerHTML = `<p class="loading-text">কোনো ক্যাটাগরি পাওয়া যায়নি!</p>`;
+                return;
+            }
+
+            // UI রেন্ডারিং
+            Object.keys(groupedCategories).forEach(mainCat => {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                header.innerText = `📁 ${mainCat}`;
+                card.appendChild(header);
+
+                const subList = document.createElement('div');
+                subList.className = 'subcategory-list';
+
+                groupedCategories[mainCat].forEach(subCat => {
+                    const btn = document.createElement('a');
+                    btn.className = 'subcategory-btn';
+                    btn.innerText = subCat;
+                    btn.href = `quiz.html?category=${encodeURIComponent(mainCat + '/' + subCat)}`;
+                    subList.appendChild(btn);
+                });
+
+                card.appendChild(subList);
+                wrapper.appendChild(card);
+            });
+
+        } catch (err) {
+            console.error("Error loading categories:", err);
+            wrapper.innerHTML = `<p style="text-align:center; color:red;">ক্যাটাগরি ডাটা লোড করতে সমস্যা হয়েছে!</p>`;
+        }
+    }
+
+    window.onload = fetchCategories;
+</script>
+
+</body>
+</html>
