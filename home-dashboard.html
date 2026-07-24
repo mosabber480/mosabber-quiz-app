@@ -71,16 +71,53 @@
         .section-card.package-card { border-left: 6px solid var(--warning); }
 
         .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
-        .item-box { background: #f8fafc; padding: 15px 20px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #cbd5e1; }
+        
+        /* READ-ONLY CARD UNIFIED STYLE (.q-card style) */
+        .read-box { 
+            background: #fdfdfd; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            border-left: 5px solid #ffc107; 
+            transition: all 0.2s ease;
+        }
+
+        .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
+        .read-subtitle { font-size: 14px; color: #555; margin-bottom: 8px; }
+        .read-meta { font-size: 13px; color: #555; margin-bottom: 4px; }
+        .read-preview-text { font-size: 13px; color: #777; margin-bottom: 10px; }
+
+        /* ITEM BOX STYLE */
+        .item-box { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #cbd5e1; }
+        
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 13px; }
+        input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; outline: none; background: white; }
+        input:focus { border-color: var(--primary); }
+
         .row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
-        .row input { flex: 1; min-width: 180px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; outline: none; }
-        .row input:focus { border-color: var(--primary); }
+        .row input { flex: 1; min-width: 180px; }
+
+        .card-actions { display: flex; gap: 10px; margin-top: 15px; }
+
+        /* BUTTON STYLES */
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-submit { background-color: #28a745; color: white; }
+        .btn-submit:hover { background-color: #218838; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
 
         .section-action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section { display: none; background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 5px; cursor: pointer; font-weight: bold; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section:hover { background-color: var(--primary-dark); }
-        .btn-remove { background: var(--danger); color: white; border: none; padding: 10px 14px; border-radius: 5px; cursor: pointer; }
+        .btn-remove { background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .btn-remove:hover { background: #c82333; }
     </style>
 </head>
 <body>
@@ -108,9 +145,10 @@
         <!-- ১. SLIDERS MANAGER CARD -->
         <div class="section-card slider-card" id="card-slider">
             <div class="section-title"><i class="fa-solid fa-images" style="color: var(--primary);"></i> ১. স্লাইডার সেকশন (Sliders)</div>
+            <div id="slider-read-container"></div>
             <div id="slider-container"></div>
             <div class="section-action-bar">
-                <button type="button" class="btn-add" onclick="addSliderRow(); showSaveBtn('slider');">
+                <button type="button" class="btn-add" onclick="addSliderRow();">
                     <i class="fa-solid fa-plus"></i> স্লাইডার যোগ করুন
                 </button>
                 <button type="button" class="btn-save-section" id="save-slider-btn" onclick="saveHomeConfig()">
@@ -122,9 +160,10 @@
         <!-- ২. DEMO QUIZZES CARD -->
         <div class="section-card demo-card" id="card-demo">
             <div class="section-title"><i class="fa-solid fa-pen-to-square" style="color: var(--secondary);"></i> ২. ফ্রি ডেমো কুইজ (Demo Quizzes)</div>
+            <div id="demo-read-container"></div>
             <div id="demo-container"></div>
             <div class="section-action-bar">
-                <button type="button" class="btn-add" onclick="addDemoRow(); showSaveBtn('demo');">
+                <button type="button" class="btn-add" onclick="addDemoRow();">
                     <i class="fa-solid fa-plus"></i> ডেমো কুইজ যোগ করুন
                 </button>
                 <button type="button" class="btn-save-section" id="save-demo-btn" onclick="saveHomeConfig()">
@@ -136,9 +175,10 @@
         <!-- ৩. PACKAGES CARD -->
         <div class="section-card package-card" id="card-package">
             <div class="section-title"><i class="fa-solid fa-box-open" style="color: var(--warning);"></i> ৩. প্রিপারেশন প্যাকেজ (Packages)</div>
+            <div id="package-read-container"></div>
             <div id="package-container"></div>
             <div class="section-action-bar">
-                <button type="button" class="btn-add" onclick="addPackageRow(); showSaveBtn('package');">
+                <button type="button" class="btn-add" onclick="addPackageRow();">
                     <i class="fa-solid fa-plus"></i> প্যাকেজ যোগ করুন
                 </button>
                 <button type="button" class="btn-save-section" id="save-package-btn" onclick="saveHomeConfig()">
@@ -150,15 +190,32 @@
 
     <script>
         const CONFIG_API_URL = 'https://mosabber-quiz-app.onrender.com/api/home-config';
+        let sliderDataList = [];
+        let demoDataList = [];
+        let packageDataList = [];
 
-        function showTopAlert(msg, type = 'info') {
+        function showTopAlert(msg, type = 'info', isConfirm = false) {
             return new Promise((resolve) => {
                 const banner = document.getElementById('topAlertBanner');
                 document.getElementById('alertMessage').innerHTML = msg;
                 banner.className = type;
                 banner.style.display = 'flex';
-                document.getElementById('alertOkBtn').onclick = () => { banner.style.display = 'none'; resolve(true); };
-                setTimeout(() => { banner.style.display = 'none'; resolve(true); }, 4000);
+
+                const okBtn = document.getElementById('alertOkBtn');
+                const cancelBtn = document.getElementById('alertCancelBtn');
+
+                if (isConfirm) {
+                    cancelBtn.style.display = 'inline-block';
+                } else {
+                    cancelBtn.style.display = 'none';
+                }
+
+                okBtn.onclick = () => { banner.style.display = 'none'; resolve(true); };
+                cancelBtn.onclick = () => { banner.style.display = 'none'; resolve(false); };
+
+                if (!isConfirm) {
+                    setTimeout(() => { banner.style.display = 'none'; resolve(true); }, 4000);
+                }
             });
         }
 
@@ -177,46 +234,123 @@
         }
 
         function removeItemRow(btn, sectionType) {
-            const container = document.getElementById(`${sectionType}-container`);
             btn.closest('.item-box').remove();
             
-            const remainingCount = container.querySelectorAll('.item-box').length;
-            if (remainingCount === 0) {
+            const container = document.getElementById(`${sectionType}-container`);
+            const activeNewFieldsCount = container.querySelectorAll('.item-box').length;
+
+            if (activeNewFieldsCount === 0) {
                 hideSaveBtn(sectionType);
             } else {
                 showSaveBtn(sectionType);
             }
         }
 
-        document.addEventListener('input', (e) => {
-            if (e.target.tagName === 'INPUT') {
-                const card = e.target.closest('.section-card');
-                if (card) {
-                    if (card.id === 'card-slider') showSaveBtn('slider');
-                    if (card.id === 'card-demo') showSaveBtn('demo');
-                    if (card.id === 'card-package') showSaveBtn('package');
-                }
-            }
-        });
-
         async function fetchHomeConfig() {
             try {
                 const res = await fetch(CONFIG_API_URL);
                 const data = await res.json();
 
+                sliderDataList = data.sliders || [];
+                demoDataList = data.demoQuizzes || [];
+                packageDataList = data.packages || [];
+
+                renderSliderReadCards();
+                renderDemoReadCards();
+                renderPackageReadCards();
+
                 document.getElementById('slider-container').innerHTML = '';
                 document.getElementById('demo-container').innerHTML = '';
                 document.getElementById('package-container').innerHTML = '';
-
-                if (data.sliders && data.sliders.length > 0) data.sliders.forEach(s => addSliderRow(s));
-                if (data.demoQuizzes && data.demoQuizzes.length > 0) data.demoQuizzes.forEach(d => addDemoRow(d));
-                if (data.packages && data.packages.length > 0) data.packages.forEach(p => addPackageRow(p));
 
                 hideAllSaveBtns();
             } catch (err) { console.error("Config fetch failed:", err); }
         }
 
-        function addSliderRow(data = {}) {
+        /* ================= 1. SLIDERS SECTION ================= */
+        function renderSliderReadCards() {
+            const container = document.getElementById('slider-read-container');
+            container.innerHTML = '';
+            if (sliderDataList.length === 0) return;
+
+            sliderDataList.forEach((s, index) => {
+                const card = document.createElement('div');
+                card.className = 'read-box';
+                card.id = `slider-card-${index}`;
+
+                card.innerHTML = `
+                    <div class="read-title">স্লাইডার #${index + 1}: ${s.title || '(টাইটেল নেই)'}</div>
+                    <div class="read-subtitle"><b>Subtitle:</b> ${s.subtitle || 'None'}</div>
+                    <div class="read-meta">
+                        <b>Image:</b> ${s.bgImage || 'images/slider-01.jpg'} | <b>Opacity:</b> ${s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}
+                    </div>
+                    <div class="read-preview-text">
+                        <b>Button 1:</b> ${s.btn1Text || '🚀 কুইজ শুরু করুন'} (${s.btn1Link || 'all-mcq.html'}) | 
+                        <b>Button 2:</b> ${s.btn2Text || 'ফ্রি ডেমো দেখুন'} (${s.btn2Link || '#demo'})
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-warning" onclick="enableInlineSliderEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <button class="btn btn-danger" onclick="deleteSingleSlider(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function enableInlineSliderEdit(index) {
+            const s = sliderDataList[index];
+            const card = document.getElementById(`slider-card-${index}`);
+            card.style.borderLeft = "6px solid #007bff";
+            card.style.background = "#ffffff";
+
+            card.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">Editing Slider #${index + 1}</div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>টাইটেল (Title):</label><input type="text" id="edit-slide-title-${index}" value="${(s.title || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group" style="flex:1;"><label>সাব-টাইটেল (Subtitle):</label><input type="text" id="edit-slide-subtitle-${index}" value="${(s.subtitle || '').replace(/"/g, '&quot;')}" required></div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>ইমেজ লিংক (Image URL):</label><input type="text" id="edit-slide-img-${index}" value="${(s.bgImage || 'images/slider-01.jpg').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group" style="flex:1;"><label>অপাসিটি (Opacity):</label><input type="number" step="0.1" min="0" max="1" id="edit-slide-opacity-${index}" value="${s.bgOpacity !== undefined ? s.bgOpacity : '0.5'}"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>বাটন ১ নাম:</label><input type="text" id="edit-slide-btn1-text-${index}" value="${(s.btn1Text || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group" style="flex:1;"><label>বাটন ১ লিংক (URL):</label><input type="text" id="edit-slide-btn1-link-${index}" value="${(s.btn1Link || '').replace(/"/g, '&quot;')}"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>বাটন ২ নাম:</label><input type="text" id="edit-slide-btn2-text-${index}" value="${(s.btn2Text || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="form-group" style="flex:1;"><label>বাটন ২ লিংক (URL):</label><input type="text" id="edit-slide-btn2-link-${index}" value="${(s.btn2Link || '').replace(/"/g, '&quot;')}"></div>
+                </div>
+                <div class="card-actions" style="margin-top: 10px;">
+                    <button class="btn btn-submit" onclick="saveInlineSliderEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-secondary" onclick="renderSliderReadCards(); checkSaveBtnVisibility('slider');"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                </div>
+            `;
+            showSaveBtn('slider');
+        }
+
+        async function saveInlineSliderEdit(index) {
+            sliderDataList[index] = {
+                title: document.getElementById(`edit-slide-title-${index}`).value,
+                subtitle: document.getElementById(`edit-slide-subtitle-${index}`).value,
+                bgImage: document.getElementById(`edit-slide-img-${index}`).value || 'images/slider-01.jpg',
+                bgOpacity: parseFloat(document.getElementById(`edit-slide-opacity-${index}`).value) || 0.5,
+                btn1Text: document.getElementById(`edit-slide-btn1-text-${index}`).value,
+                btn1Link: document.getElementById(`edit-slide-btn1-link-${index}`).value,
+                btn2Text: document.getElementById(`edit-slide-btn2-text-${index}`).value,
+                btn2Link: document.getElementById(`edit-slide-btn2-link-${index}`).value
+            };
+            await saveHomeConfig();
+        }
+
+        async function deleteSingleSlider(index) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই স্লাইডারটি মুছে ফেলতে চান?", 'danger', true)) {
+                sliderDataList.splice(index, 1);
+                await saveHomeConfig();
+            }
+        }
+
+        function addSliderRow(data = {}, autoShowSave = true) {
             const container = document.getElementById('slider-container');
             const div = document.createElement('div');
             div.className = 'item-box slider-item-box';
@@ -231,18 +365,85 @@
                 </div>
                 <div class="row">
                     <input type="text" placeholder="বাটন ১ নাম" class="slide-btn1-text" value="${data.btn1Text || '🚀 কুইজ শুরু করুন'}">
-                    <input type="text" placeholder="বাটন ১ লিংক (URL)" class="slide-btn1-link" value="${data.btn1Link || 'All MCQ.html'}">
+                    <input type="text" placeholder="বাটন ১ লিংক (URL)" class="slide-btn1-link" value="${data.btn1Link || 'all-mcq.html'}">
                 </div>
                 <div class="row">
                     <input type="text" placeholder="বাটন ২ নাম" class="slide-btn2-text" value="${data.btn2Text || 'ফ্রি ডেমো দেখুন'}">
                     <input type="text" placeholder="বাটন ২ লিংক (URL)" class="slide-btn2-link" value="${data.btn2Link || '#demo'}">
-                    <button type="button" class="btn-remove" onclick="removeItemRow(this, 'slider')"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" class="btn-remove" onclick="removeItemRow(this, 'slider')"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `;
             container.appendChild(div);
+            if (autoShowSave) showSaveBtn('slider');
         }
 
-        function addDemoRow(data = {}) {
+        /* ================= 2. DEMO QUIZZES SECTION ================= */
+        function renderDemoReadCards() {
+            const container = document.getElementById('demo-read-container');
+            container.innerHTML = '';
+            if (demoDataList.length === 0) return;
+
+            demoDataList.forEach((d, index) => {
+                const card = document.createElement('div');
+                card.className = 'read-box';
+                card.id = `demo-card-${index}`;
+
+                card.innerHTML = `
+                    <div class="read-title">ডেমো কুইজ #${index + 1}: ${d.title || '(নাম নেই)'}</div>
+                    <div class="read-subtitle"><b>Badge:</b> ${d.badgeText || 'ফ্রি টেস্ট'}</div>
+                    <div class="read-meta"><b>Description:</b> ${d.desc || 'None'}</div>
+                    <div class="read-preview-text"><b>Quiz Link:</b> ${d.link || 'None'}</div>
+                    <div class="card-actions">
+                        <button class="btn btn-warning" onclick="enableInlineDemoEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <button class="btn btn-danger" onclick="deleteSingleDemo(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function enableInlineDemoEdit(index) {
+            const d = demoDataList[index];
+            const card = document.getElementById(`demo-card-${index}`);
+            card.style.borderLeft = "6px solid #007bff";
+            card.style.background = "#ffffff";
+
+            card.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">Editing Demo Quiz #${index + 1}</div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>কুইজ নাম:</label><input type="text" id="edit-demo-title-${index}" value="${(d.title || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group" style="flex:1;"><label>ব্যাজ (যেমন: ফ্রি টেস্ট):</label><input type="text" id="edit-demo-badge-${index}" value="${(d.badgeText || 'ফ্রি টেস্ট').replace(/"/g, '&quot;')}"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>সংক্ষিপ্ত বিবরণ:</label><input type="text" id="edit-demo-desc-${index}" value="${(d.desc || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group" style="flex:1;"><label>কুইজ লিংক (URL):</label><input type="text" id="edit-demo-link-${index}" value="${(d.link || '').replace(/"/g, '&quot;')}" required></div>
+                </div>
+                <div class="card-actions" style="margin-top: 10px;">
+                    <button class="btn btn-submit" onclick="saveInlineDemoEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-secondary" onclick="renderDemoReadCards(); checkSaveBtnVisibility('demo');"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                </div>
+            `;
+            showSaveBtn('demo');
+        }
+
+        async function saveInlineDemoEdit(index) {
+            demoDataList[index] = {
+                title: document.getElementById(`edit-demo-title-${index}`).value,
+                badgeText: document.getElementById(`edit-demo-badge-${index}`).value,
+                desc: document.getElementById(`edit-demo-desc-${index}`).value,
+                link: document.getElementById(`edit-demo-link-${index}`).value
+            };
+            await saveHomeConfig();
+        }
+
+        async function deleteSingleDemo(index) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই ডেমো কুইজটি মুছে ফেলতে চান?", 'danger', true)) {
+                demoDataList.splice(index, 1);
+                await saveHomeConfig();
+            }
+        }
+
+        function addDemoRow(data = {}, autoShowSave = true) {
             const container = document.getElementById('demo-container');
             const div = document.createElement('div');
             div.className = 'item-box demo-item-box';
@@ -254,13 +455,86 @@
                 <div class="row">
                     <input type="text" placeholder="সংক্ষিপ্ত বিবরণ" class="demo-desc" value="${data.desc || ''}" required>
                     <input type="text" placeholder="কুইজ লিংক (URL)" class="demo-link" value="${data.link || ''}" required>
-                    <button type="button" class="btn-remove" onclick="removeItemRow(this, 'demo')"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" class="btn-remove" onclick="removeItemRow(this, 'demo')"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `;
             container.appendChild(div);
+            if (autoShowSave) showSaveBtn('demo');
         }
 
-        function addPackageRow(data = {}) {
+        /* ================= 3. PACKAGES SECTION ================= */
+        function renderPackageReadCards() {
+            const container = document.getElementById('package-read-container');
+            container.innerHTML = '';
+            if (packageDataList.length === 0) return;
+
+            packageDataList.forEach((p, index) => {
+                const card = document.createElement('div');
+                card.className = 'read-box';
+                card.id = `package-card-${index}`;
+
+                card.innerHTML = `
+                    <div class="read-title">প্যাকেজ #${index + 1}: ${p.title || '(নাম নেই)'}</div>
+                    <div class="read-subtitle"><b>Price:</b> ${p.price || '৳০'} | <b>Duration:</b> ${p.duration || 'N/A'}</div>
+                    <div class="read-meta"><b>Description:</b> ${p.desc || 'None'}</div>
+                    <div class="read-preview-text"><b>Image URL:</b> ${p.imageUrl || 'None'} | <b>Buy Link:</b> ${p.buyLink || '#contact'}</div>
+                    <div class="card-actions">
+                        <button class="btn btn-warning" onclick="enableInlinePackageEdit(${index})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <button class="btn btn-danger" onclick="deleteSinglePackage(${index})"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function enableInlinePackageEdit(index) {
+            const p = packageDataList[index];
+            const card = document.getElementById(`package-card-${index}`);
+            card.style.borderLeft = "6px solid #007bff";
+            card.style.background = "#ffffff";
+
+            card.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">Editing Package #${index + 1}</div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>প্যাকেজের নাম:</label><input type="text" id="edit-pkg-title-${index}" value="${(p.title || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group" style="flex:1;"><label>মূল্য (যেমন: ৳৪৯৯):</label><input type="text" id="edit-pkg-price-${index}" value="${(p.price || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group" style="flex:1;"><label>মেয়াদ (যেমন: / ৬ মাস):</label><input type="text" id="edit-pkg-duration-${index}" value="${(p.duration || '').replace(/"/g, '&quot;')}" required></div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>সংক্ষিপ্ত বিবরণ:</label><input type="text" id="edit-pkg-desc-${index}" value="${(p.desc || '').replace(/"/g, '&quot;')}" required></div>
+                    <div class="form-group" style="flex:1;"><label>ইমেজ URL:</label><input type="text" id="edit-pkg-img-${index}" value="${(p.imageUrl || '').replace(/"/g, '&quot;')}"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex:1;"><label>বাই লিংক (URL):</label><input type="text" id="edit-pkg-buylink-${index}" value="${(p.buyLink || '#contact').replace(/"/g, '&quot;')}"></div>
+                </div>
+                <div class="card-actions" style="margin-top: 10px;">
+                    <button class="btn btn-submit" onclick="saveInlinePackageEdit(${index})"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    <button class="btn btn-secondary" onclick="renderPackageReadCards(); checkSaveBtnVisibility('package');"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                </div>
+            `;
+            showSaveBtn('package');
+        }
+
+        async function saveInlinePackageEdit(index) {
+            packageDataList[index] = {
+                title: document.getElementById(`edit-pkg-title-${index}`).value,
+                price: document.getElementById(`edit-pkg-price-${index}`).value,
+                duration: document.getElementById(`edit-pkg-duration-${index}`).value,
+                desc: document.getElementById(`edit-pkg-desc-${index}`).value,
+                imageUrl: document.getElementById(`edit-pkg-img-${index}`).value,
+                buyLink: document.getElementById(`edit-pkg-buylink-${index}`).value
+            };
+            await saveHomeConfig();
+        }
+
+        async function deleteSinglePackage(index) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে এই প্যাকেজটি মুছে ফেলতে চান?", 'danger', true)) {
+                packageDataList.splice(index, 1);
+                await saveHomeConfig();
+            }
+        }
+
+        function addPackageRow(data = {}, autoShowSave = true) {
             const container = document.getElementById('package-container');
             const div = document.createElement('div');
             div.className = 'item-box package-item-box';
@@ -276,13 +550,21 @@
                 </div>
                 <div class="row">
                     <input type="text" placeholder="বাই লিংক (URL)" class="pkg-buylink" value="${data.buyLink || '#contact'}">
-                    <button type="button" class="btn-remove" onclick="removeItemRow(this, 'package')"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" class="btn-remove" onclick="removeItemRow(this, 'package')"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `;
             container.appendChild(div);
+            if (autoShowSave) showSaveBtn('package');
         }
 
-        // Save All Config safely to Backend
+        function checkSaveBtnVisibility(sectionType) {
+            const container = document.getElementById(`${sectionType}-container`);
+            if (container.querySelectorAll('.item-box').length === 0) {
+                hideSaveBtn(sectionType);
+            }
+        }
+
+        /* ================= SAVE ALL CONFIG TO BACKEND ================= */
         async function saveHomeConfig() {
             const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
             if (!token) { 
@@ -290,8 +572,7 @@
                 return; 
             }
 
-            // Safe value extraction with optional chaining and fallback
-            const sliders = Array.from(document.querySelectorAll('.slider-item-box')).map(box => ({
+            const newSliders = Array.from(document.querySelectorAll('.slider-item-box')).map(box => ({
                 title: box.querySelector('.slide-title')?.value || '',
                 subtitle: box.querySelector('.slide-subtitle')?.value || '',
                 bgImage: box.querySelector('.slide-img')?.value || 'images/slider-01.jpg',
@@ -301,15 +582,17 @@
                 btn2Text: box.querySelector('.slide-btn2-text')?.value || '',
                 btn2Link: box.querySelector('.slide-btn2-link')?.value || ''
             }));
+            const finalSliders = [...sliderDataList, ...newSliders];
 
-            const demoQuizzes = Array.from(document.querySelectorAll('.demo-item-box')).map(box => ({
+            const newDemoQuizzes = Array.from(document.querySelectorAll('.demo-item-box')).map(box => ({
                 title: box.querySelector('.demo-title')?.value || '',
                 badgeText: box.querySelector('.demo-badge')?.value || '',
                 desc: box.querySelector('.demo-desc')?.value || '',
                 link: box.querySelector('.demo-link')?.value || ''
             }));
+            const finalDemoQuizzes = [...demoDataList, ...newDemoQuizzes];
 
-            const packages = Array.from(document.querySelectorAll('.package-item-box')).map(box => ({
+            const newPackages = Array.from(document.querySelectorAll('.package-item-box')).map(box => ({
                 title: box.querySelector('.pkg-title')?.value || '',
                 price: box.querySelector('.pkg-price')?.value || '',
                 duration: box.querySelector('.pkg-duration')?.value || '',
@@ -317,6 +600,7 @@
                 imageUrl: box.querySelector('.pkg-img')?.value || '',
                 buyLink: box.querySelector('.pkg-buylink')?.value || ''
             }));
+            const finalPackages = [...packageDataList, ...newPackages];
 
             try {
                 const res = await fetch(CONFIG_API_URL, {
@@ -325,7 +609,7 @@
                         'Content-Type': 'application/json', 
                         'Authorization': `Bearer ${token}` 
                     },
-                    body: JSON.stringify({ sliders, demoQuizzes, packages })
+                    body: JSON.stringify({ sliders: finalSliders, demoQuizzes: finalDemoQuizzes, packages: finalPackages })
                 });
 
                 const result = await res.json();
@@ -333,6 +617,7 @@
                 if (res.ok) {
                     showTopAlert('✅ সফলভাবে সেভ হয়েছে!', 'success');
                     hideAllSaveBtns();
+                    fetchHomeConfig();
                 } else { 
                     showTopAlert('❌ ' + (result.message || 'সেভ করতে ব্যর্থ হয়েছে!'), 'danger'); 
                 }
@@ -343,8 +628,7 @@
         }
 
         async function logout() {
-            const confirmed = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
-            if (confirmed) {
+            if (await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true)) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 localStorage.removeItem('quiz_token');
