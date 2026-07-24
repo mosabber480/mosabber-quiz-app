@@ -1,40 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment & User Management - Admin Dashboard</title>
+    <title>Payment & User Management - TopMCQ</title>
+    
+    <!-- Instant Auth Check (Direct Redirect without Alert Popup) -->
+    <script>
+        (function checkAuth() {
+            const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+            if (!token) {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            padding: 25px; 
-            background-color: #f4f7f6; 
-            max-width: 1600px; 
-            margin: 0 auto; 
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --secondary: #17a2b8;
+            --warning: #ff9f43;
+            --danger: #dc3545;
+            --dark: #2c3e50;
+            --light: #f4f7f6;
+            --gray-btn: #6c757d;
+            --main-dash-btn: #28a745;
         }
 
-        .dashboard-header {
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--light); 
+            color: #333;
+        }
+
+        /* TOP ALERT BANNER SYSTEM */
+        #topAlertBanner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            padding: 12px 30px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            background-color: #ffffff;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 15px;
+            border-top: 16px solid #2a3c4d; /* Full 100% width Top Rectangle Line */
+            border-bottom: 1px solid #e2e8f0;
+            animation: slideDown 0.3s ease-in-out;
+        }
+
+        /* Left Side Accent Line */
+        #topAlertBanner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 6px;
+            background-color: var(--danger);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-100%); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dynamic left bar colors depending on alert type */
+        #topAlertBanner.info::before { background-color: var(--primary); }
+        #topAlertBanner.success::before { background-color: var(--main-dash-btn); }
+        #topAlertBanner.warning::before { background-color: var(--warning); }
+        #topAlertBanner.danger::before { background-color: var(--danger); }
+
+        .alert-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-alert {
+            padding: 7px 18px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-alert-ok { 
+            background-color: var(--primary); 
+            color: white; 
+        }
+        .btn-alert-ok:hover { 
+            background-color: var(--primary-dark); 
+        }
+
+        .btn-alert-cancel { 
+            background-color: #e2e8f0; 
+            color: #4a5568; 
+        }
+        .btn-alert-cancel:hover { 
+            background-color: #cbd5e1; 
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background-color: var(--dark);
+            color: white;
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 25px;
-            background: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        .btn-home {
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 5px;
+        .navbar-brand {
+            font-size: 22px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Header Navigation Buttons */
+        .btn-nav {
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 6px;
             font-size: 14px;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-main-dash { background-color: var(--main-dash-btn); color: white; }
+        .btn-main-dash:hover { background-color: #218838; }
+
+        .btn-mcq-dash { background-color: var(--gray-btn); color: white; }
+        .btn-mcq-dash:hover { background-color: #5a6268; }
+
+        .btn-payment-users { background-color: var(--secondary); color: white; }
+        .btn-payment-users:hover { background-color: #138496; }
+
+        .btn-outline { border: 1px solid white; color: white; background: transparent; }
+        .btn-outline:hover { background: white; color: var(--dark); }
+
+        .btn-danger-nav { background-color: var(--danger); color: white; }
+        .btn-danger-nav:hover { background-color: #bd2130; }
+
+        /* Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px 25px 25px;
         }
 
         .box { 
@@ -75,93 +212,164 @@
         @media (max-width: 900px) {
             .grid-2 { grid-template-columns: 1fr; }
             table { display: block; overflow-x: auto; }
+            .navbar { flex-direction: column; gap: 15px; text-align: center; }
+            .nav-actions { flex-wrap: wrap; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation -->
-    <div class="dashboard-header">
-        <h2 style="margin:0; color:#2c3e50;">💳 Payment & User Management</h2>
-        <div style="display: flex; gap: 10px;">
-            <a href="dashboard.html" class="btn-home" style="background-color: #6c757d;">📝 MCQ Dashboard</a>
-            <a href="users.html" class="btn-home" style="background-color: #17a2b8;">💳 Payment & Users</a>
-            <a href="index.html" class="btn-home">🏠 হোম পেজ দেখুন</a>
+    <!-- TOP ALERT / CONFIRMATION BANNER -->
+    <div id="topAlertBanner">
+        <span id="alertMessage">Message here...</span>
+        <div class="alert-btns">
+            <button class="btn-alert btn-alert-ok" id="alertOkBtn">OK</button>
+            <button class="btn-alert btn-alert-cancel" id="alertCancelBtn" style="display:none;">Cancel</button>
         </div>
     </div>
 
-    <!-- Admin Tools (Owner Only Controls) -->
-    <div class="grid-2">
-        <!-- Create New Admin Section (Owner Only) -->
-        <div class="box" id="createAdminBox" style="display:none; border-left: 5px solid #007bff;">
-            <h3>➕ Create New Admin Account</h3>
-            <form id="createAdminForm">
-                <div class="form-group">
-                    <label>Admin Name:</label>
-                    <input type="text" id="adminName" placeholder="Enter name" required>
-                </div>
-                <div class="form-group">
-                    <label>Admin Email:</label>
-                    <input type="email" id="adminEmail" placeholder="Enter email" required>
-                </div>
-                <div class="form-group">
-                    <label>Admin Password:</label>
-                    <input type="password" id="adminPassword" placeholder="Set password" required>
-                </div>
-                <button type="submit" class="btn-action btn-submit">Create Admin Account</button>
-            </form>
+    <!-- Top Navigation Bar -->
+    <div class="navbar">
+        <div class="navbar-brand">
+            <i class="fa-solid fa-gauge-high"></i> অ্যাডমিন ড্যাশবোর্ড
         </div>
+        <div class="nav-actions">
+            <!-- Main Dashboard -->
+            <a href="dashboard.html" class="btn-nav btn-main-dash">
+                <i class="fa-solid fa-house"></i> Main Dashboard
+            </a>
 
-        <!-- Change Own Password Section -->
-        <div class="box" style="border-left: 5px solid #ffc107;">
-            <h3>🔐 Change Your Password</h3>
-            <form id="changePasswordForm">
-                <div class="form-group">
-                    <label>Current Password:</label>
-                    <input type="password" id="oldPassword" placeholder="Enter current password" required>
-                </div>
-                <div class="form-group">
-                    <label>New Password:</label>
-                    <input type="password" id="newPassword" placeholder="Enter new password" required>
-                </div>
-                <button type="submit" class="btn-action btn-submit" style="background-color: #ffc107; color:#212529;">Update Password</button>
-            </form>
+            <!-- MCQ Dashboard -->
+            <a href="quiz-dashboard.html" class="btn-nav btn-mcq-dash">
+                <i class="fa-solid fa-pen-to-square"></i> MCQ Dashboard
+            </a>
+
+            <!-- Payment & Users -->
+            <a href="users.html" class="btn-nav btn-payment-users">
+                <i class="fa-solid fa-credit-card"></i> Payment & Users
+            </a>
+
+            <!-- Main Website Link -->
+            <a href="index.html" class="btn-nav btn-outline" target="_blank">
+                <i class="fa-solid fa-globe"></i> মূল ওয়েবসাইট
+            </a>
+
+            <!-- Logout Button -->
+            <button class="btn-nav btn-danger-nav" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> লগআউট
+            </button>
         </div>
     </div>
 
-    <!-- User Table Section -->
-    <div class="box">
-        <h3>👥 Registered Users & Subscription Plans</h3>
-        <p style="color:#666; font-size:14px;">Select a plan for any customer and click <b>Update Plan</b> to activate their subscription access.</p>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>User Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Current Plan</th>
-                    <th>Validity Expiry Date</th>
-                    <th>Action (Set Plan)</th>
-                    <th>Remove</th>
-                </tr>
-            </thead>
-            <tbody id="userTableBody">
-                <tr><td colspan="9" style="text-align:center;">Loading users...</td></tr>
-            </tbody>
-        </table>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Admin Tools (Owner Only Controls) -->
+        <div class="grid-2">
+            <!-- Create New Admin Section (Owner Only) -->
+            <div class="box" id="createAdminBox" style="display:none; border-left: 5px solid #007bff;">
+                <h3>➕ Create New Admin Account</h3>
+                <form id="createAdminForm">
+                    <div class="form-group">
+                        <label>Admin Name:</label>
+                        <input type="text" id="adminName" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Admin Email:</label>
+                        <input type="email" id="adminEmail" placeholder="Enter email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Admin Password:</label>
+                        <input type="password" id="adminPassword" placeholder="Set password" required>
+                    </div>
+                    <button type="submit" class="btn-action btn-submit">Create Admin Account</button>
+                </form>
+            </div>
+
+            <!-- Change Own Password Section -->
+            <div class="box" style="border-left: 5px solid #ffc107;">
+                <h3>🔐 Change Your Password</h3>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label>Current Password:</label>
+                        <input type="password" id="oldPassword" placeholder="Enter current password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password:</label>
+                        <input type="password" id="newPassword" placeholder="Enter new password" required>
+                    </div>
+                    <button type="submit" class="btn-action btn-submit" style="background-color: #ffc107; color:#212529;">Update Password</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- User Table Section -->
+        <div class="box">
+            <h3>👥 Registered Users & Subscription Plans</h3>
+            <p style="color:#666; font-size:14px; margin-top: 5px;">Select a plan for any customer and click <b>Update Plan</b> to activate their subscription access.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Current Plan</th>
+                        <th>Validity Expiry Date</th>
+                        <th>Action (Set Plan)</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr><td colspan="9" style="text-align:center;">Loading users...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
         const API_BASE = 'https://mosabber-quiz-app.onrender.com/api';
-        const token = localStorage.getItem('quiz_token');
-        const currentUser = JSON.parse(localStorage.getItem('quiz_user') || '{}');
+        const token = localStorage.getItem('token') || localStorage.getItem('quiz_token');
+        const currentUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('quiz_user') || '{}');
 
-        if (!token) {
-            alert("Unauthorized! Please login first.");
-            window.location.href = 'login.html';
+        /* CUSTOM TOP ALERT / CONFIRM SYSTEM */
+        function showTopAlert(msg, type = 'info', isConfirm = false) {
+            return new Promise((resolve) => {
+                const banner = document.getElementById('topAlertBanner');
+                const msgSpan = document.getElementById('alertMessage');
+                const okBtn = document.getElementById('alertOkBtn');
+                const cancelBtn = document.getElementById('alertCancelBtn');
+
+                banner.className = type;
+                msgSpan.innerHTML = msg;
+                banner.style.display = 'flex';
+
+                if (isConfirm) {
+                    cancelBtn.style.display = 'inline-block';
+                    okBtn.innerText = 'OK';
+                } else {
+                    cancelBtn.style.display = 'none';
+                    okBtn.innerText = 'OK';
+                }
+
+                okBtn.onclick = function() {
+                    banner.style.display = 'none';
+                    resolve(true);
+                };
+
+                cancelBtn.onclick = function() {
+                    banner.style.display = 'none';
+                    resolve(false);
+                };
+
+                if (!isConfirm) {
+                    setTimeout(() => {
+                        banner.style.display = 'none';
+                        resolve(true);
+                    }, 4000);
+                }
+            });
         }
 
         // Show Create Admin Box only to Owner
@@ -245,18 +453,19 @@
 
                 const data = await res.json();
                 if (data.success) {
-                    alert(`✅ ${data.message}`);
+                    showTopAlert(`✅ ${data.message}`, 'success');
                     loadUsers();
                 } else {
-                    alert(`❌ Failed: ${data.message}`);
+                    showTopAlert(`❌ Failed: ${data.message}`, 'danger');
                 }
             } catch (err) {
-                alert("❌ Error updating plan!");
+                showTopAlert("❌ Error updating plan!", 'danger');
             }
         }
 
         async function deleteUser(userId, userName) {
-            if (!confirm(`Are you sure you want to delete user '${userName}'?`)) return;
+            const confirmed = await showTopAlert(`Are you sure you want to delete user '${userName}'?`, 'danger', true);
+            if (!confirmed) return;
 
             try {
                 const res = await fetch(`${API_BASE}/users/${userId}`, {
@@ -265,13 +474,13 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert(`✅ ${data.message}`);
+                    showTopAlert(`✅ ${data.message}`, 'success');
                     loadUsers();
                 } else {
-                    alert(`❌ Delete failed: ${data.message}`);
+                    showTopAlert(`❌ Delete failed: ${data.message}`, 'danger');
                 }
             } catch (err) {
-                alert("❌ Error deleting user!");
+                showTopAlert("❌ Error deleting user!", 'danger');
             }
         }
 
@@ -293,14 +502,14 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert(`🎉 ${data.message}`);
+                    showTopAlert(`🎉 ${data.message}`, 'success');
                     document.getElementById('createAdminForm').reset();
                     loadUsers();
                 } else {
-                    alert(`❌ Error: ${data.message}`);
+                    showTopAlert(`❌ Error: ${data.message}`, 'danger');
                 }
             } catch (err) {
-                alert("❌ Error creating admin!");
+                showTopAlert("❌ Error creating admin!", 'danger');
             }
         });
 
@@ -321,15 +530,27 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert(`✅ ${data.message}`);
+                    showTopAlert(`✅ ${data.message}`, 'success');
                     document.getElementById('changePasswordForm').reset();
                 } else {
-                    alert(`❌ Password change failed: ${data.message}`);
+                    showTopAlert(`❌ Password change failed: ${data.message}`, 'danger');
                 }
             } catch (err) {
-                alert("❌ Error changing password!");
+                showTopAlert("❌ Error changing password!", 'danger');
             }
         });
+
+        // Custom Logout function
+        async function logout() {
+            const confirmed = await showTopAlert('আপনি কি নিশ্চিত যে লগআউট করতে চান?', 'warning', true);
+            if (confirmed) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('quiz_token');
+                localStorage.removeItem('quiz_user');
+                window.location.replace('login.html');
+            }
+        }
 
         window.onload = loadUsers;
     </script>

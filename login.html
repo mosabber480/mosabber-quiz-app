@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Register - MCQ Platform</title>
+    <title>Login / Register - TopMCQ</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -156,20 +156,22 @@
                 });
                 const data = await res.json();
 
-                if (data.success) {
-                    // Save Token & User Info to LocalStorage
+                if (res.ok && (data.success || data.token)) {
+                    // FIX: Save using both 'token' and 'quiz_token' to support all pages seamlessly
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('quiz_token', data.token);
                     localStorage.setItem('quiz_user', JSON.stringify(data.user));
 
                     showAlert("✅ Login Successful! Redirecting...", true);
                     
                     setTimeout(() => {
-                        if (data.user.role === 'owner' || data.user.role === 'admin') {
+                        if (data.user && (data.user.role === 'owner' || data.user.role === 'admin')) {
                             window.location.href = 'dashboard.html';
                         } else {
                             window.location.href = 'profile.html';
                         }
-                    }, 1200);
+                    }, 1000);
                 } else {
                     showAlert(data.message || "❌ Invalid login credentials!");
                 }
@@ -200,7 +202,7 @@
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if (res.ok && (data.success || data.token)) {
                     showAlert("🎉 Registration successful! Please login below.", true);
                     setTimeout(() => toggleForm('login'), 1500);
                 } else {

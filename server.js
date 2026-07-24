@@ -7,7 +7,9 @@ const bcrypt = require('bcryptjs');
 // Environment Config & Middlewares
 require('dotenv').config();
 const User = require('./models/User');
+const HomeConfig = require('./models/HomeConfig'); 
 const authRoutes = require('./routes/auth');
+const homeConfigRoutes = require('./routes/homeConfigRoutes'); 
 const { verifyToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -38,6 +40,9 @@ const Question = mongoose.model('Question', questionSchema);
 
 // ------------------- AUTHENTICATION ROUTES -------------------
 app.use('/api/auth', authRoutes);
+
+// ------------------- HOME CONFIG ROUTES (Slider, Demo, Packages) -------------------
+app.use('/api/home-config', homeConfigRoutes);
 
 // Change Password API (Any Logged In User)
 app.put('/api/auth/change-password', verifyToken, async (req, res) => {
@@ -164,7 +169,7 @@ app.delete('/api/users/:userId', verifyToken, authorizeRoles('owner'), async (re
 
 // ------------------- QUESTION API ENDPOINTS -------------------
 
-// 1. Get Questions (Publicly Accessible - Smooth Quiz Experience)
+// 1. Get Questions (Publicly Accessible)
 app.get('/api/questions', async (req, res) => {
     try {
         const { category } = req.query;
