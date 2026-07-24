@@ -84,15 +84,6 @@
             transition: all 0.2s ease;
         }
 
-        .header-info-box {
-            background: #eef2f7;
-            border: 1px solid #cbd5e1;
-            border-left: 5px solid var(--primary);
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
         .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
         .read-subtitle { font-size: 14px; color: #555; margin-bottom: 8px; }
         .read-meta { font-size: 13px; color: #555; margin-bottom: 4px; }
@@ -126,7 +117,7 @@
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section { display: none; background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 5px; cursor: pointer; font-weight: bold; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section:hover { background-color: var(--primary-dark); }
-        .btn-remove { background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 5px; cursor: display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .btn-remove { background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .btn-remove:hover { background: #c82333; }
     </style>
 </head>
@@ -304,10 +295,10 @@
             container.innerHTML = '';
 
             if (info && (info.title || info.subtitle)) {
-                // Show Read-Only Header Box
+                // slider-read-container এর .read-box ক্লাসের মতোই হুবহু ডিজাইন
                 container.innerHTML = `
-                    <div class="header-info-box" id="${type}-header-card">
-                        <div class="read-title"><i class="fa-solid fa-heading"></i> ${info.title || '(টাইটেল নেই)'}</div>
+                    <div class="read-box" id="${type}-header-card" style="border-left: 5px solid #17a2b8;">
+                        <div class="read-title"><i class="fa-solid fa-heading" style="color: var(--secondary);"></i> ${info.title || '(টাইটেল নেই)'}</div>
                         <div class="read-subtitle"><b>সাব-টাইটেল:</b> ${info.subtitle || '(সাব-টাইটেল নেই)'}</div>
                         <div class="card-actions" style="margin-top: 10px;">
                             <button class="btn btn-warning" onclick="editHeaderSection('${type}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
@@ -316,7 +307,6 @@
                     </div>
                 `;
             } else {
-                // Show "Add Title & Subtitle" Button
                 container.innerHTML = `
                     <button class="btn btn-add" style="margin-bottom: 15px;" onclick="editHeaderSection('${type}', true)">
                         <i class="fa-solid fa-plus"></i> টাইটেল ও সাবটাইটেল যোগ করুন
@@ -333,7 +323,7 @@
             const subtitleVal = info ? info.subtitle || '' : '';
 
             container.innerHTML = `
-                <div class="item-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                <div class="read-box" style="border-left: 5px solid #007bff; background: #ffffff;">
                     <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
                         ${isNew ? 'নতুন টাইটেল ও সাবটাইটেল যোগ করুন' : 'টাইটেল ও সাবটাইটেল এডিট করুন'}
                     </div>
