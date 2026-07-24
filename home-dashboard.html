@@ -71,8 +71,9 @@
         .section-card.package-card { border-left: 6px solid var(--warning); }
 
         .section-title { font-size: 20px; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
-        
-        /* READ-ONLY CARD UNIFIED STYLE (.q-card style) */
+        .sub-header-title { font-size: 16px; font-weight: bold; color: var(--dark); margin: 15px 0 10px 0; display: flex; align-items: center; gap: 8px; }
+
+        /* READ-ONLY CARD STYLE */
         .read-box { 
             background: #fdfdfd; 
             border: 1px solid #ddd; 
@@ -81,6 +82,15 @@
             margin-bottom: 15px; 
             border-left: 5px solid #ffc107; 
             transition: all 0.2s ease;
+        }
+
+        .header-info-box {
+            background: #eef2f7;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
         .read-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
@@ -116,7 +126,7 @@
         .btn-add { background: var(--main-dash-btn); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section { display: none; background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 5px; cursor: pointer; font-weight: bold; align-items: center; gap: 8px; font-size: 14px; }
         .btn-save-section:hover { background-color: var(--primary-dark); }
-        .btn-remove { background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .btn-remove { background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 5px; cursor: display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .btn-remove:hover { background: #c82333; }
     </style>
 </head>
@@ -160,6 +170,11 @@
         <!-- ২. DEMO QUIZZES CARD -->
         <div class="section-card demo-card" id="card-demo">
             <div class="section-title"><i class="fa-solid fa-pen-to-square" style="color: var(--secondary);"></i> ২. ফ্রি ডেমো কুইজ (Demo Quizzes)</div>
+            
+            <!-- DEMO HEADER TITLE/SUBTITLE SECTION -->
+            <div id="demo-header-container"></div>
+
+            <div class="sub-header-title"><i class="fa-solid fa-list"></i> ডেমো কুইজের তালিকা:</div>
             <div id="demo-read-container"></div>
             <div id="demo-container"></div>
             <div class="section-action-bar">
@@ -175,6 +190,11 @@
         <!-- ৩. PACKAGES CARD -->
         <div class="section-card package-card" id="card-package">
             <div class="section-title"><i class="fa-solid fa-box-open" style="color: var(--warning);"></i> ৩. প্রিপারেশন প্যাকেজ (Packages)</div>
+            
+            <!-- PACKAGE HEADER TITLE/SUBTITLE SECTION -->
+            <div id="package-header-container"></div>
+
+            <div class="sub-header-title"><i class="fa-solid fa-list"></i> প্যাকেজের তালিকা:</div>
             <div id="package-read-container"></div>
             <div id="package-container"></div>
             <div class="section-action-bar">
@@ -193,6 +213,9 @@
         let sliderDataList = [];
         let demoDataList = [];
         let packageDataList = [];
+
+        let demoHeaderInfo = null;
+        let packageHeaderInfo = null;
 
         function showTopAlert(msg, type = 'info', isConfirm = false) {
             return new Promise((resolve) => {
@@ -255,9 +278,15 @@
                 demoDataList = data.demoQuizzes || [];
                 packageDataList = data.packages || [];
 
+                demoHeaderInfo = data.demoSectionInfo || null;
+                packageHeaderInfo = data.packageSectionInfo || null;
+
                 renderSliderReadCards();
                 renderDemoReadCards();
                 renderPackageReadCards();
+
+                renderHeaderSection('demo');
+                renderHeaderSection('package');
 
                 document.getElementById('slider-container').innerHTML = '';
                 document.getElementById('demo-container').innerHTML = '';
@@ -265,6 +294,91 @@
 
                 hideAllSaveBtns();
             } catch (err) { console.error("Config fetch failed:", err); }
+        }
+
+        /* ================= SECTION HEADER (TITLE & SUBTITLE) HANDLER ================= */
+        function renderHeaderSection(type) {
+            const container = document.getElementById(`${type}-header-container`);
+            const info = type === 'demo' ? demoHeaderInfo : packageHeaderInfo;
+
+            container.innerHTML = '';
+
+            if (info && (info.title || info.subtitle)) {
+                // Show Read-Only Header Box
+                container.innerHTML = `
+                    <div class="header-info-box" id="${type}-header-card">
+                        <div class="read-title"><i class="fa-solid fa-heading"></i> ${info.title || '(টাইটেল নেই)'}</div>
+                        <div class="read-subtitle"><b>সাব-টাইটেল:</b> ${info.subtitle || '(সাব-টাইটেল নেই)'}</div>
+                        <div class="card-actions" style="margin-top: 10px;">
+                            <button class="btn btn-warning" onclick="editHeaderSection('${type}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            <button class="btn btn-danger" onclick="deleteHeaderSection('${type}')"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show "Add Title & Subtitle" Button
+                container.innerHTML = `
+                    <button class="btn btn-add" style="margin-bottom: 15px;" onclick="editHeaderSection('${type}', true)">
+                        <i class="fa-solid fa-plus"></i> টাইটেল ও সাবটাইটেল যোগ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function editHeaderSection(type, isNew = false) {
+            const container = document.getElementById(`${type}-header-container`);
+            const info = type === 'demo' ? demoHeaderInfo : packageHeaderInfo;
+
+            const titleVal = info ? info.title || '' : '';
+            const subtitleVal = info ? info.subtitle || '' : '';
+
+            container.innerHTML = `
+                <div class="item-box" style="border-left: 5px solid #007bff; background: #ffffff;">
+                    <div style="font-weight: bold; margin-bottom: 12px; color: #007bff;">
+                        ${isNew ? 'নতুন টাইটেল ও সাবটাইটেল যোগ করুন' : 'টাইটেল ও সাবটাইটেল এডিট করুন'}
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="flex:1;">
+                            <label>সেকশন টাইটেল (Title):</label>
+                            <input type="text" id="${type}-header-title-input" value="${titleVal.replace(/"/g, '&quot;')}" placeholder="যেমন: ফ্রি ডেমো কুইজ">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>সেকশন সাব-টাইটেল (Subtitle):</label>
+                            <input type="text" id="${type}-header-subtitle-input" value="${subtitleVal.replace(/"/g, '&quot;')}" placeholder="যেমন: আপনার প্রস্তুতি যাচাই করুন">
+                        </div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 10px;">
+                        <button class="btn btn-submit" onclick="saveHeaderSection('${type}')"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <button class="btn btn-secondary" onclick="renderHeaderSection('${type}')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveHeaderSection(type) {
+            const titleInput = document.getElementById(`${type}-header-title-input`).value;
+            const subtitleInput = document.getElementById(`${type}-header-subtitle-input`).value;
+
+            if (type === 'demo') {
+                demoHeaderInfo = { title: titleInput, subtitle: subtitleInput };
+            } else {
+                packageHeaderInfo = { title: titleInput, subtitle: subtitleInput };
+            }
+
+            await saveHomeConfig();
+            renderHeaderSection(type);
+        }
+
+        async function deleteHeaderSection(type) {
+            if (await showTopAlert("আপনি কি নিশ্চিত যে সেকশনের টাইটেল ও সাবটাইটেল মুছে ফেলতে চান?", 'danger', true)) {
+                if (type === 'demo') {
+                    demoHeaderInfo = null;
+                } else {
+                    packageHeaderInfo = null;
+                }
+                await saveHomeConfig();
+                renderHeaderSection(type);
+            }
         }
 
         /* ================= 1. SLIDERS SECTION ================= */
@@ -609,7 +723,13 @@
                         'Content-Type': 'application/json', 
                         'Authorization': `Bearer ${token}` 
                     },
-                    body: JSON.stringify({ sliders: finalSliders, demoQuizzes: finalDemoQuizzes, packages: finalPackages })
+                    body: JSON.stringify({ 
+                        sliders: finalSliders, 
+                        demoQuizzes: finalDemoQuizzes, 
+                        packages: finalPackages,
+                        demoSectionInfo: demoHeaderInfo,
+                        packageSectionInfo: packageHeaderInfo
+                    })
                 });
 
                 const result = await res.json();

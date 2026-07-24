@@ -24,7 +24,16 @@ const homeConfigSchema = new mongoose.Schema({
         desc: { type: String, default: '' },
         imageUrl: { type: String, default: '' },
         buyLink: { type: String, default: '' }
-    }]
+    }],
+    // 🌟 নতুন যুক্ত করা সেকশন হেডার অবজেক্টসমূহ
+    demoSectionInfo: {
+        title: { type: String, default: '' },
+        subtitle: { type: String, default: '' }
+    },
+    packageSectionInfo: {
+        title: { type: String, default: '' },
+        subtitle: { type: String, default: '' }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('HomeConfig', homeConfigSchema);

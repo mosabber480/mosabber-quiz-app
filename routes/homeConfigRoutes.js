@@ -8,7 +8,13 @@ router.get('/', async (req, res) => {
     try {
         let config = await HomeConfig.findOne();
         if (!config) {
-            config = { sliders: [], demoQuizzes: [], packages: [] };
+            config = { 
+                sliders: [], 
+                demoQuizzes: [], 
+                packages: [], 
+                demoSectionInfo: { title: '', subtitle: '' },
+                packageSectionInfo: { title: '', subtitle: '' }
+            };
         }
         res.status(200).json(config);
     } catch (err) {
@@ -20,19 +26,23 @@ router.get('/', async (req, res) => {
 // POST /api/home-config (Owner & Admin only)
 router.post('/', verifyToken, authorizeRoles('owner', 'admin'), async (req, res) => {
     try {
-        const { sliders, demoQuizzes, packages } = req.body;
+        const { sliders, demoQuizzes, packages, demoSectionInfo, packageSectionInfo } = req.body;
 
         let config = await HomeConfig.findOne();
         if (config) {
             config.sliders = sliders || [];
             config.demoQuizzes = demoQuizzes || [];
             config.packages = packages || [];
+            config.demoSectionInfo = demoSectionInfo || { title: '', subtitle: '' };
+            config.packageSectionInfo = packageSectionInfo || { title: '', subtitle: '' };
             await config.save();
         } else {
             config = await HomeConfig.create({
                 sliders: sliders || [],
                 demoQuizzes: demoQuizzes || [],
-                packages: packages || []
+                packages: packages || [],
+                demoSectionInfo: demoSectionInfo || { title: '', subtitle: '' },
+                packageSectionInfo: packageSectionInfo || { title: '', subtitle: '' }
             });
         }
 

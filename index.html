@@ -287,8 +287,8 @@
 
     <!-- 4. Free Demo Quiz Section -->
     <section class="section-container" id="demo">
-        <h2 class="section-title">ফ্রি ডেমো কুইজ (Free Demo Quiz)</h2>
-        <p class="section-subtitle">কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন</p>
+        <h2 class="section-title" id="demo-section-title">ফ্রি ডেমো কুইজ (Free Demo Quiz)</h2>
+        <p class="section-subtitle" id="demo-section-subtitle">কোনো রেজিস্ট্রেশন ছাড়াই এখনই নিচের কুইজগুলো প্র্যাকটিস করে দেখুন</p>
         <div class="demo-grid" id="demo-wrapper">
             <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> কুইজ লোড হচ্ছে...</div>
         </div>
@@ -296,8 +296,8 @@
 
     <!-- 5. Packages Section -->
     <section class="section-container" id="packages">
-        <h2 class="section-title">আমাদের প্রিপারেশন প্যাকেজসমূহ</h2>
-        <p class="section-subtitle">আপনার প্রয়োজন অনুযায়ী সেরা প্যাকেজটি বেছে নিন</p>
+        <h2 class="section-title" id="package-section-title">আমাদের প্রিপারেশন প্যাকেজসমূহ</h2>
+        <p class="section-subtitle" id="package-section-subtitle">আপনার প্রয়োজন অনুযায়ী সেরা প্যাকেজটি বেছে নিন</p>
         <div class="package-grid" id="packages-wrapper">
             <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> প্যাকেজ লোড হচ্ছে...</div>
         </div>
@@ -392,7 +392,14 @@
                     sliderWrapper.innerHTML = `<p style="text-align:center; padding: 40px; color:white;">কোনো স্লাইডার পাওয়া যায়নি।</p>`;
                 }
 
-                // 2. Render Demo Quizzes
+                // 2. Dynamic Demo Section Title & Subtitle + Render Quizzes
+                const demoTitleEl = document.getElementById('demo-section-title');
+                const demoSubEl = document.getElementById('demo-section-subtitle');
+                if (data.demoSectionInfo && data.demoSectionInfo.title) {
+                    if (demoTitleEl) demoTitleEl.innerText = data.demoSectionInfo.title;
+                    if (demoSubEl) demoSubEl.innerText = data.demoSectionInfo.subtitle || '';
+                }
+
                 const demoWrapper = document.getElementById('demo-wrapper');
                 if (data.demoQuizzes && data.demoQuizzes.length > 0) {
                     demoWrapper.innerHTML = data.demoQuizzes.map(d => `
@@ -409,7 +416,14 @@
                     demoWrapper.innerHTML = `<p style="text-align:center;">কোনো ডেমো কুইজ পাওয়া যায়নি।</p>`;
                 }
 
-                // 3. Render Packages
+                // 3. Dynamic Package Section Title & Subtitle + Render Packages
+                const pkgTitleEl = document.getElementById('package-section-title');
+                const pkgSubEl = document.getElementById('package-section-subtitle');
+                if (data.packageSectionInfo && data.packageSectionInfo.title) {
+                    if (pkgTitleEl) pkgTitleEl.innerText = data.packageSectionInfo.title;
+                    if (pkgSubEl) pkgSubEl.innerText = data.packageSectionInfo.subtitle || '';
+                }
+
                 const pkgWrapper = document.getElementById('packages-wrapper');
                 if (data.packages && data.packages.length > 0) {
                     pkgWrapper.innerHTML = data.packages.map(p => `
